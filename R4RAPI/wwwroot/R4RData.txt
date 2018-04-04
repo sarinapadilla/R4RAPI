@@ -1,0 +1,290 @@
+{
+  "results": [
+    {
+	  "id": 1234,
+	  "title": "Resource A",
+	  "website": "http://example.com/resourcea",
+	  "description": "Multiple paragraphs describing the resource",
+	  "toolTypes": [
+		{
+		   "type": {
+			 "key": "datasets_databases",
+			 "label": "Datasets & Databases"
+		   },
+		   "subtype": {
+			 "key": "genomic_datasets",
+			 "label": "genomic datasets"
+		   }
+		},
+		{
+		   "type": {
+			 "key": "analysis_tools",
+			 "label": "Analysis Tools"
+		   }
+		}
+	  ],
+	  "researchAreas": [
+		{
+		  "key": "",
+		  "label": ""
+		}
+	  ],
+	  "researchTypes": [
+		{
+		  "key": "health_services_research",
+		  "label": "Health Services Research"
+		}
+	  ],
+	  "resourceAccess": {
+		"type": "Requires Registration",
+		"notes": "This requires a MTA"
+	  },
+	  "docs": [
+		"Office of Data Research"
+	  ],
+	  "pocs": [
+		{
+		  "name": {
+			"prefix": "Dr.",
+			"firstName": "Jane",
+			"middleName": "C.",
+			"lastName": "Doe",
+			"suffix": "M.D."
+		  },
+		  "title": "Branch Chief, Data Branch",
+		  "phone": "240-555-1234",
+		  "email": "jane.doe@nih.gov"
+		}
+	  ]
+	},
+	{
+	  "id": 5678,
+	  "title": "Resource B",
+	  "website": "http://example.com/resourceb",
+	  "description": "Multiple paragraphs describing the resource",
+	  "toolTypes": [
+		{
+		   "type": {
+			 "key": "datasets_databases",
+			 "label": "Datasets & Databases"
+		   },
+		   "subtype": {
+			 "key": "genomic_datasets",
+			 "label": "genomic datasets"
+		   }
+		},
+		{
+		   "type": {
+			 "key": "analysis_tools",
+			 "label": "Analysis Tools"
+		   }
+		}
+	  ],
+	  "researchAreas": [
+		{
+		  "key": "",
+		  "label": ""
+		}
+	  ],
+	  "researchTypes": [
+		{
+		  "key": "supportive_care",
+		  "label": "Supportive Care"
+		}
+	  ],
+	  "resourceAccess": {
+		"type": "Requires Registration",
+		"notes": "This requires a MTA"
+	  },
+	  "docs": [
+		"Office of Data Research"
+	  ],
+	  "pocs": [
+		{
+		  "name": {
+			"prefix": "Dr.",
+			"firstName": "John",
+			"middleName": "A.",
+			"lastName": "Doe",
+			"suffix": "Ph.D."
+		  },
+		  "title": "Branch Chief, Data Branch",
+		  "phone": "240-555-1212",
+		  "email": "john.doe@nih.gov"
+		}
+	  ]
+	},
+	{
+	  "id": 9009,
+	  "title": "Resource C",
+	  "website": "http://example.com/resourcec",
+	  "description": "Multiple paragraphs describing the resource",
+	  "toolTypes": [
+		{
+		   "type": {
+			 "key": "datasets_databases",
+			 "label": "Datasets & Databases"
+		   },
+		   "subtype": {
+			 "key": "genomic_datasets",
+			 "label": "genomic datasets"
+		   }
+		},
+		{
+		   "type": {
+			 "key": "analysis_tools",
+			 "label": "Analysis Tools"
+		   }
+		}
+	  ],
+	  "researchAreas": [
+		{
+		  "key": "",
+		  "label": ""
+		}
+	  ],
+	  "researchTypes": [
+		{
+		  "key": "diagnostic",
+		  "label": "Diagnostic"
+		}
+	  ],
+	  "resourceAccess": {
+		"type": "Requires Registration",
+		"notes": "This requires a MTA"
+	  },
+	  "docs": [
+		"Office of Data Research"
+	  ],
+	  "pocs": [
+		{
+		  "name": {
+			"prefix": "Dr.",
+			"firstName": "Jane",
+			"middleName": "C.",
+			"lastName": "Doe",
+			"suffix": "M.D."
+		  },
+		  "title": "Branch Chief, Data Branch",
+		  "phone": "240-555-1234",
+		  "email": "jane.doe@nih.gov"
+		}
+	  ]
+	},
+	{
+	  "id": 8765,
+	  "title": "Resource D",
+	  "website": "http://example.com/resourced",
+	  "description": "Multiple paragraphs describing the resource",
+	  "toolTypes": [
+		{
+		   "type": {
+			 "key": "datasets_databases",
+			 "label": "Datasets & Databases"
+		   },
+		   "subtype": {
+			 "key": "genomic_datasets",
+			 "label": "genomic datasets"
+		   }
+		},
+		{
+		   "type": {
+			 "key": "analysis_tools",
+			 "label": "Analysis Tools"
+		   }
+		}
+	  ],
+	  "researchAreas": [
+		{
+		  "key": "",
+		  "label": ""
+		}
+	  ],
+	  "researchTypes": [
+		{
+		  "key": "treatment",
+		  "label": "Treatment"
+		}
+	  ],
+	  "resourceAccess": {
+		"type": "Requires Registration",
+		"notes": "This requires a MTA"
+	  },
+	  "docs": [
+		"Office of Data Research"
+	  ],
+	  "pocs": [
+		{
+		  "name": {
+			"prefix": "Dr.",
+			"firstName": "John",
+			"middleName": "A.",
+			"lastName": "Doe",
+			"suffix": "Ph.D."
+		  },
+		  "title": "Branch Chief, Data Branch",
+		  "phone": "240-555-1212",
+		  "email": "john.doe@nih.gov"
+		}
+	  ]
+	},
+	{
+	  "id": 4321,
+	  "title": "Resource E",
+	  "website": "http://example.com/resource",
+	  "description": "Multiple paragraphs describing the resource",
+	  "toolTypes": [
+		{
+		   "type": {
+			 "key": "datasets_databases",
+			 "label": "Datasets & Databases"
+		   },
+		   "subtype": {
+			 "key": "genomic_datasets",
+			 "label": "genomic datasets"
+		   }
+		},
+		{
+		   "type": {
+			 "key": "analysis_tools",
+			 "label": "Analysis Tools"
+		   }
+		}
+	  ],
+	  "researchAreas": [
+		{
+		  "key": "",
+		  "label": ""
+		}
+	  ],
+	  "researchTypes": [
+		{
+		  "key": "screening",
+		  "label": "Screening"
+		}
+	  ],
+	  "resourceAccess": {
+		"type": "Requires Registration",
+		"notes": "This requires a MTA"
+	  },
+	  "docs": [
+		"Office of Data Research"
+	  ],
+	  "pocs": [
+		{
+		  "name": {
+			"prefix": "Dr.",
+			"firstName": "Jane",
+			"middleName": "C.",
+			"lastName": "Doe",
+			"suffix": "M.D."
+		  },
+		  "title": "Branch Chief, Data Branch",
+		  "phone": "240-555-1234",
+		  "email": "jane.doe@nih.gov"
+		}
+	  ]
+	}
+	
+  ]
+}
