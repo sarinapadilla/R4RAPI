@@ -7,6 +7,8 @@ using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using R4RAPI.Models;
 using Newtonsoft.Json;
 
@@ -18,15 +20,21 @@ namespace R4RAPI.Controllers
     {
         private static readonly string _file = "R4RData.txt";
         private IHostingEnvironment _environment;
+        private readonly ILogger _logger;
+        private readonly ElasticSearchOptions _esOptions;
 
-        public ResourcesController(IHostingEnvironment environment)
+        public ResourcesController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IOptions<ElasticSearchOptions> esOptionsAccessor)
         {
             _environment = environment;
+            _logger = logger;
+            _esOptions = esOptionsAccessor.Value;
         }
 
         [HttpGet]
         public ResourceResults GetAll()
         {
+            _logger.LogDebug(_esOptions.MaximumRetries.ToString());
+
             string webRoot = _environment.WebRootPath;
             string filePath = Path.Combine(webRoot, _file);
 
@@ -44,14 +52,6 @@ namespace R4RAPI.Controllers
                 //log.ErrorFormat("GetAll(): Path {0} not found.", ex, filePath);
                 return null;
             }
-
-            /*
-            List<Resource> res = new List<Resource>();
-            Resource resource = new Resource(12345);
-            Resource resource2 = new Resource(67890);
-            res.Add(resource);
-            res.Add(resource2);
-            */
         }
     }
 }

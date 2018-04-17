@@ -8,5 +8,7 @@ namespace R4RAPI.Models
     public class PageMetaData
     {
         public int TotalResults { get; set; }
+
+        public string OriginalQuery { get; set; }
     }
 }
