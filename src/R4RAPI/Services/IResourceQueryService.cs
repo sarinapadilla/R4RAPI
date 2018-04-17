@@ -21,15 +21,13 @@ namespace R4RAPI.Services
         /// <param name="query">Query parameters (optional)</param>
         /// <param name="size">Number of results to return (optional)</param>
         /// <param name="from">Beginning index for results (optional)</param>
-        /// <param name="includeFields">Fields to include (optional)</param>
-        /// <param name="excludeFields">Fields to exclude (optional)</param>        
+        /// <param name="includeFields">Fields to include (optional)</param>      
         /// <returns>Resource query result</returns>
-        ResourceQueryResult Search(
+        ResourceQueryResult Query(
             ResourceQuery query,
             int size = 10,
             int from = 0,
-            string[] includeFields = null,
-            string[] excludeFields = null
+            string[] includeFields = null
             );
     }
 }
