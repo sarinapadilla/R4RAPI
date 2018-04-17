@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace R4RAPI.Models
 {
-    public class FacetIem
+    public class FacetItem
     {
         public string Key { get; set; }
 

@@ -10,7 +10,5 @@ namespace R4RAPI.Models
         public string TotalResults { get; set; }
 
         public Resource[] Results { get; set; }
-
-        public Facet[] Facets { get; set; }
     }
 }

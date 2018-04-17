@@ -11,6 +11,6 @@ namespace R4RAPI.Models
 
         public string Param { get; set; }
 
-        public FacetIem[] Items { get; set; }
+        public FacetItem[] Items { get; set; }
     }
 }
