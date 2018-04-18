@@ -30,6 +30,7 @@ namespace R4RAPI
             services.AddOptions();
 
             services.Configure<ElasticsearchOptions>(Configuration.GetSection("Elasticsearch"));
+            services.Configure<R4RAPIOptions>(Configuration.GetSection("R4RAPI"));
 
             // This will inject an IElasticClient using our configuration into any
             // controllers that take an IElasticClient parameter into its constructor.

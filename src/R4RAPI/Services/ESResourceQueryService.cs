@@ -2,50 +2,81 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Nest;
 using R4RAPI.Models;
 
 namespace R4RAPI.Services
 {
-    public class ESResourceQueryService
+    /// <summary>
+    /// Service for fetching R4R Resources
+    /// </summary>
+    public class ESResourceQueryService : IResourceQueryService
     {
+        private IElasticClient _elasticClient;
+        private R4RAPIOptions _apiOptions;
+        private readonly ILogger<ESResourceQueryService> _logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:R4RAPI.Services.ESResourceQueryService"/> class.
+        /// </summary>
+        /// <param name="client">A configured Elasticsearch client</param>
+        /// <param name="logger">A logger for logging.</param>
+        public ESResourceQueryService(IElasticClient client, R4RAPIOptions apiOptions, ILogger<ESResourceQueryService> logger)
+        {
+            this._elasticClient = client;
+            this._apiOptions = apiOptions;
+            this._logger = logger;
+        }
+
         /// <summary>
         /// Gets a resource from the API via its ID.
         /// </summary>
         /// <param name="id">The ID of the resource</param>
         /// <returns>The resource</returns>
-        public ResourceQueryResult Get(string id)
+        public Resource Get(string id)
         {
+            Resource resResult = null;
 
-            ResourceQueryResult resResult = null;
-
-            if (String.IsNullOrWhiteSpace(id))
+            // If the given ID is null or empty, throw an exception
+            if (string.IsNullOrWhiteSpace(id))
             {
-                throw new ArgumentNullException("The resource identifier is null or an empty string");
+                throw new ArgumentNullException("The resource identifier is null or an empty string.");
             }
 
-            //Get the HTTP response content from GET request
-            //HttpContent httpContent = ReturnGetRespContent("clinical-trial", id);
-            //rtnTrial = httpContent.ReadAsAsync<ClinicalTrial>().Result;
+            // Validate if given ID is correctly formatted as an int
+            int resID;
+            bool validID = int.TryParse(id, out resID);
 
-            // If there are no sites for a trial in the API, the ClinicalTrial object will return Sites == null.  
-            // If this is the case, make ClinicalTrial.Sites an empty list.
-            //if (rtnTrial.Sites == null)
-            //{
-            //    rtnTrial.Sites = new List<ClinicalTrial.StudySite>();
-            //}
+            if(validID)
+            {
+                var response = _elasticClient.Get<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
+                if(response.Found && response.IsValid)
+                {
+                    resResult = response.Source;
+                }
+                else if (response.Found && !response.IsValid)
+                {
+                    this._logger.LogError("Bad request.");
+                }
+                else if (!response.Found && response.IsValid)
+                {
+                    this._logger.LogError("Resource not found.");
+                }
+            }
 
             return resResult;
         }
 
         /// <summary>
-        /// Calls the search endpoint (/resources) of the R4R API
+        /// Gets the resources that match the given params
         /// </summary>
         /// <param name="query">Query parameters (optional)</param>
         /// <param name="size">Number of results to return (optional)</param>
         /// <param name="from">Beginning index for results (optional)</param>
         /// <param name="includeFields">Fields to include (optional)</param>       
         /// <returns>Resource query result</returns>
-        public ResourceQueryResult Query(
+        public ResourceQueryResult QueryResources(
             ResourceQuery query,
             int size = 10,
             int from = 0,
@@ -57,25 +88,7 @@ namespace R4RAPI.Services
             //Handle Null include/exclude field
             query = query ?? new ResourceQuery();
 
-            //Make a copy of our search query so that we don't muck with the original.
-            //(The query will need to contain the size, from, etc
-            //JObject requestBody = (JObject)query.DeepClone();
-            //requestBody.Add(new JProperty("size", size));
-            //requestBody.Add(new JProperty("from", from));
-
-            //if (includeFields.Length > 0)
-            //{
-            //    requestBody.Add(new JProperty("include", includeFields));
-            //}
-
-            //if (excludeFields.Length > 0)
-            //{
-            //    requestBody.Add(new JProperty("exclude", excludeFields));
-            //}
-
-            //Get the HTTP response content from POST request
-            //HttpContent httpContent = ReturnPostRespContent("clinical-trials", requestBody);
-            //rtnResults = httpContent.ReadAsAsync<ClinicalTrialsCollection>().Result;
+            //var response = _elasticClient.Search<Resource>();
 
             return resResults;
         }
