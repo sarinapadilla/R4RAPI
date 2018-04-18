@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace R4RAPI.Models
 {
-    public class ElasticSearchOptions
+    public class ElasticsearchOptions
     {
         public string Servers { get; set; }
         public string Userid { get; set; }
