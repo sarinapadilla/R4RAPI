@@ -65,7 +65,10 @@ namespace R4RAPI.Test.Services
             });
 
             ESResourceAggregationService aggSvc = GetAggService(conn);
-            KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
+            try
+            {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
+            } catch (Exception ex) {} //We don't care how it processes the results...
 
 
             Assert.Equal(expectedPath, actualPath);
@@ -85,7 +88,33 @@ namespace R4RAPI.Test.Services
             IConnection conn = new ESResAggSvcConnection("ResearchTypes_EmptyQuery");
 
             //Expected Aggs
-            KeyLabelAggResult[] expectedAggs = new KeyLabelAggResult[] { };
+            KeyLabelAggResult[] expectedAggs = new KeyLabelAggResult[] {
+                new KeyLabelAggResult() {
+                    Key = "basic",
+                    Label = "Basic",
+                    Count = 94
+                },
+                new KeyLabelAggResult() {
+                    Key = "translational",
+                    Label = "Translational",
+                    Count = 66
+                },
+                new KeyLabelAggResult() {
+                    Key = "clinical_trials",
+                    Label = "Clinical Trials",
+                    Count = 42
+                },
+                new KeyLabelAggResult() {
+                    Key = "epidemiologic",
+                    Label = "Epidemiologic",
+                    Count = 26
+                },
+                new KeyLabelAggResult() {
+                    Key = "clinical",
+                    Label = "Clinical",
+                    Count = 5
+                }
+            };
 
             ESResourceAggregationService aggSvc = GetAggService(conn);
             KeyLabelAggResult[] actualAggs = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());

@@ -29,7 +29,6 @@ namespace R4RAPI.Controllers
 
         private IHostingEnvironment _environment;
         private readonly ILogger _logger;
-<<<<<<< HEAD
         private readonly ElasticsearchOptions _esOptions;
         private readonly ESResourceQueryService _queryService;
 
@@ -56,19 +55,19 @@ namespace R4RAPI.Controllers
         )
         {
             // Set default values for params
-            if(IsNullOrEmpty(includeFields))
+            if (IsNullOrEmpty(includeFields))
             {
                 includeFields = new string[] { };
             }
 
-            if(IsNullOrEmpty(includeFacets))
+            if (IsNullOrEmpty(includeFacets))
             {
                 includeFacets = DefaultFacets;
             }
 
             // TODO: Validate query params here
             // 1. Cause error if subToolType exists, but no toolType
-            if(IsNullOrEmpty(toolTypes) && !IsNullOrEmpty(subTypes))
+            if (IsNullOrEmpty(toolTypes) && !IsNullOrEmpty(subTypes))
             {
                 _logger.LogError("Cannot have subtype without tooltype.", subTypes);
             }
@@ -77,48 +76,26 @@ namespace R4RAPI.Controllers
             {
                 _logger.LogError("Cannot have multiple tooltype.", toolTypes);
             }
-<<<<<<< HEAD
-
-            // Build query object using params
-            ResourceQuery resQuery = new ResourceQuery();
-
-            if(!string.IsNullOrWhiteSpace(keyword))
-            {
-                resQuery.Keyword = keyword;
-            }
-
-            if(!IsNullOrEmpty(toolTypes))
-            {
-                resQuery.Filters.Add("toolTypes.type", toolTypes);
-            }
-
-            if(!IsNullOrEmpty(subTypes))
-            {
-                resQuery.Filters.Add("toolTypes.subtype", subTypes);
-            }
-
-=======
 
             // Build resource query object using params
             ResourceQuery resQuery = new ResourceQuery();
 
-            if(!string.IsNullOrWhiteSpace(keyword))
+            if (!string.IsNullOrWhiteSpace(keyword))
             {
                 resQuery.Keyword = keyword;
             }
 
-            if(!IsNullOrEmpty(toolTypes))
+            if (!IsNullOrEmpty(toolTypes))
             {
                 resQuery.Filters.Add("toolTypes.type", toolTypes);
             }
 
-            if(!IsNullOrEmpty(subTypes))
+            if (!IsNullOrEmpty(subTypes))
             {
                 resQuery.Filters.Add("toolTypes.subtype", subTypes);
             }
 
->>>>>>> 8d44541a62b71885b5b3ada1390044290236cd0f
-            if(!IsNullOrEmpty(researchAreas))
+            if (!IsNullOrEmpty(researchAreas))
             {
                 resQuery.Filters.Add("researchAreas", researchAreas);
             }
@@ -140,15 +117,8 @@ namespace R4RAPI.Controllers
 
             ResourceQueryResult queryResults = null;
 
-<<<<<<< HEAD
-            if(!string.IsNullOrWhiteSpace(resQuery.Keyword))
-            {
-                queryResults = _queryService.Query(resQuery, size, from, includeFields);
-            }
-
-=======
             // Perform query for resources if a resource query is built
-            if(!string.IsNullOrWhiteSpace(resQuery.Keyword) ||
+            if (!string.IsNullOrWhiteSpace(resQuery.Keyword) ||
                 !IsNullOrEmpty(toolTypes) ||
                 !IsNullOrEmpty(subTypes) ||
                 !IsNullOrEmpty(researchAreas) ||
@@ -161,12 +131,10 @@ namespace R4RAPI.Controllers
             // TODO: Combine Resources (if requested) and Facets into one ResourceResult to return
 
 
->>>>>>> 8d44541a62b71885b5b3ada1390044290236cd0f
             return new ResourceResults();
 
             /*string webRoot = _environment.WebRootPath;
             string filePath = Path.Combine(webRoot, _file);
-
             try
             {
                 using (StreamReader r = new StreamReader(filePath))

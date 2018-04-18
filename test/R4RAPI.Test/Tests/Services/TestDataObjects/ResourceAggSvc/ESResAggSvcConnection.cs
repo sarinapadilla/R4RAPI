@@ -41,10 +41,10 @@ namespace R4RAPI.Test.Services
             this.RegisterRequestHandlerForType<Nest.SearchResponse<Resource>>((req, res) =>
             {
                 //Get the request parameters
-                dynamic postObj = this.GetRequestPost(req);
+                //dynamic postObj = this.GetRequestPost(req);
 
                 //Determine which round we are performing
-                int numTokens = postObj["params"].matchedtokencount;
+                //int numTokens = postObj["params"].matchedtokencount;
 
                 //Get the file name for this round
                 res.Stream = TestingTools.GetTestFileAsStream(GetTestFileName());
