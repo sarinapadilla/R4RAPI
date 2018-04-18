@@ -9,6 +9,8 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using R4RAPI.Models;
+
 namespace R4RAPI.Test.Services
 {
     /// <summary>
@@ -23,38 +25,38 @@ namespace R4RAPI.Test.Services
         /// Gets the prefix of a testdata file for this test.
         /// </summary>
         /// <returns></returns>
-        private string TestFilePrefix { get; set; }
+        private string TestFile { get; set; }
 
         /// <summary>
         /// Creates a new instance of the ESResAggSvcConnection class
         /// </summary>
-        /// <param name="testFilePrefix">The prefix of the test files</param>
-        public ESResAggSvcConnection(string testFilePrefix)
+        /// <param name="testFile">The JSON file for the test response</param>
+        public ESResAggSvcConnection(string testFile)
         {
-            this.TestFilePrefix = testFilePrefix;
+            this.TestFile = testFile;
 
             //This section is for registering the intercepters for the request.
 
             //Add Handlers            
-            //this.RegisterRequestHandlerForType<Nest.SearchResponse<BestBetsMatch>>((req, res) =>
-            //{
-            //    //Get the request parameters
-            //    dynamic postObj = this.GetRequestPost(req);
+            this.RegisterRequestHandlerForType<Nest.SearchResponse<Resource>>((req, res) =>
+            {
+                //Get the request parameters
+                dynamic postObj = this.GetRequestPost(req);
 
                 //Determine which round we are performing
-            //    int numTokens = postObj["params"].matchedtokencount;
+                int numTokens = postObj["params"].matchedtokencount;
 
                 //Get the file name for this round
-            //    res.Stream = TestingTools.GetTestFileAsStream(GetTestFileName(numTokens));
+                res.Stream = TestingTools.GetTestFileAsStream(GetTestFileName());
 
-            //    res.StatusCode = 200;
-            //});
+                res.StatusCode = 200;
+            });
 
         }
 
         private string GetTestFileName()
         {
-            return $"ESResAggSvcData/{TestFilePrefix}.json";
+            return $"ESResAggSvcData/{TestFile}.json";
         }
     }
 }
