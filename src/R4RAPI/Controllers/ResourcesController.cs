@@ -29,10 +29,11 @@ namespace R4RAPI.Controllers
 
         private IHostingEnvironment _environment;
         private readonly ILogger _logger;
-        private readonly ElasticSearchOptions _esOptions;
+<<<<<<< HEAD
+        private readonly ElasticsearchOptions _esOptions;
         private readonly ESResourceQueryService _queryService;
 
-        public ResourcesController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IOptions<ElasticSearchOptions> esOptionsAccessor, ESResourceQueryService queryService)
+        public ResourcesController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IOptions<ElasticsearchOptions> esOptionsAccessor, ESResourceQueryService queryService)
         {
             _environment = environment;
             _logger = logger;
@@ -76,6 +77,7 @@ namespace R4RAPI.Controllers
             {
                 _logger.LogError("Cannot have multiple tooltype.", toolTypes);
             }
+<<<<<<< HEAD
 
             // Build query object using params
             ResourceQuery resQuery = new ResourceQuery();
@@ -95,6 +97,27 @@ namespace R4RAPI.Controllers
                 resQuery.Filters.Add("toolTypes.subtype", subTypes);
             }
 
+=======
+
+            // Build resource query object using params
+            ResourceQuery resQuery = new ResourceQuery();
+
+            if(!string.IsNullOrWhiteSpace(keyword))
+            {
+                resQuery.Keyword = keyword;
+            }
+
+            if(!IsNullOrEmpty(toolTypes))
+            {
+                resQuery.Filters.Add("toolTypes.type", toolTypes);
+            }
+
+            if(!IsNullOrEmpty(subTypes))
+            {
+                resQuery.Filters.Add("toolTypes.subtype", subTypes);
+            }
+
+>>>>>>> 8d44541a62b71885b5b3ada1390044290236cd0f
             if(!IsNullOrEmpty(researchAreas))
             {
                 resQuery.Filters.Add("researchAreas", researchAreas);
@@ -117,11 +140,28 @@ namespace R4RAPI.Controllers
 
             ResourceQueryResult queryResults = null;
 
+<<<<<<< HEAD
             if(!string.IsNullOrWhiteSpace(resQuery.Keyword))
             {
                 queryResults = _queryService.Query(resQuery, size, from, includeFields);
             }
 
+=======
+            // Perform query for resources if a resource query is built
+            if(!string.IsNullOrWhiteSpace(resQuery.Keyword) ||
+                !IsNullOrEmpty(toolTypes) ||
+                !IsNullOrEmpty(subTypes) ||
+                !IsNullOrEmpty(researchAreas) ||
+                !IsNullOrEmpty(researchTypes)
+            )
+            {
+                queryResults = _queryService.QueryResources(resQuery, size, from, includeFields);
+            }
+
+            // TODO: Combine Resources (if requested) and Facets into one ResourceResult to return
+
+
+>>>>>>> 8d44541a62b71885b5b3ada1390044290236cd0f
             return new ResourceResults();
 
             /*string webRoot = _environment.WebRootPath;
