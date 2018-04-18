@@ -29,10 +29,10 @@ namespace R4RAPI.Controllers
 
         private IHostingEnvironment _environment;
         private readonly ILogger _logger;
-        private readonly ElasticSearchOptions _esOptions;
+        private readonly ElasticsearchOptions _esOptions;
         private readonly ESResourceQueryService _queryService;
 
-        public ResourcesController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IOptions<ElasticSearchOptions> esOptionsAccessor, ESResourceQueryService queryService)
+        public ResourcesController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IOptions<ElasticsearchOptions> esOptionsAccessor, ESResourceQueryService queryService)
         {
             _environment = environment;
             _logger = logger;
@@ -77,7 +77,7 @@ namespace R4RAPI.Controllers
                 _logger.LogError("Cannot have multiple tooltype.", toolTypes);
             }
 
-            // Build query object using params
+            // Build resource query object using params
             ResourceQuery resQuery = new ResourceQuery();
 
             if(!string.IsNullOrWhiteSpace(keyword))
@@ -117,10 +117,19 @@ namespace R4RAPI.Controllers
 
             ResourceQueryResult queryResults = null;
 
-            if(!string.IsNullOrWhiteSpace(resQuery.Keyword))
+            // Perform query for resources if a resource query is built
+            if(!string.IsNullOrWhiteSpace(resQuery.Keyword) ||
+                !IsNullOrEmpty(toolTypes) ||
+                !IsNullOrEmpty(subTypes) ||
+                !IsNullOrEmpty(researchAreas) ||
+                !IsNullOrEmpty(researchTypes)
+            )
             {
-                queryResults = _queryService.Query(resQuery, size, from, includeFields);
+                queryResults = _queryService.QueryResources(resQuery, size, from, includeFields);
             }
+
+            // TODO: Combine Resources (if requested) and Facets into one ResourceResult to return
+
 
             return new ResourceResults();
 

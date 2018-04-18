@@ -13,7 +13,7 @@ namespace R4RAPI.Services
         /// </summary>
         /// <param name="id">The ID of the resource</param>
         /// <returns>The resource</returns>
-        ResourceQueryResult Get(string id);
+        Resource Get(string id);
 
         /// <summary>
         /// Calls the search endpoint (/resources) of the R4R API
@@ -23,7 +23,7 @@ namespace R4RAPI.Services
         /// <param name="from">Beginning index for results (optional)</param>
         /// <param name="includeFields">Fields to include (optional)</param>      
         /// <returns>Resource query result</returns>
-        ResourceQueryResult Query(
+        ResourceQueryResult QueryResources(
             ResourceQuery query,
             int size = 10,
             int from = 0,
