@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Nest;
 using R4RAPI.Models;
@@ -52,12 +54,57 @@ namespace R4RAPI.Services
                 Aggregations = field.Contains(".") ? GetComplexAgg(field, query) : GetSimpleAgg(field)
             };
 
-            //We must(?) pass the C# type to map the results to
-            //even though our queries should not return anything.
-            var res = this._elasticClient.Search<Resource>(req);
+            try
+            {
+                //We must(?) pass the C# type to map the results to
+                //even though our queries should not return anything.
+                var res = this._elasticClient.Search<Resource>(req);
 
-            return new KeyLabelAggResult[] { };
+                if (field.Contains(".")) {
+                    return ExtractComplexAggs(field, res).ToArray();
+                } else {
+                    return ExtractSimpleAggs(field, res).ToArray();
+                }
+            } catch (Exception ex) {
+                this._logger.LogError($"Could not fetch aggregates for field: {field}");
+                throw new Exception($"Could not fetch aggregates for field: {field}", ex);
+            }
         }
+
+        /// <summary>
+        /// Helper function to extract the aggs for a simple (e.g. non-toolType) aggregation
+        /// </summary>
+        /// <returns>The simple aggs.</returns>
+        /// <param name="field">Field.</param>
+        /// <param name="res">Res.</param>
+        private IEnumerable<KeyLabelAggResult> ExtractSimpleAggs(string field, ISearchResponse<Resource> res)  {
+            var nested = res.Aggs.Nested($"{field}_agg");
+
+            var keys = nested.Terms($"{field}_key");
+            foreach(var keyBucket in keys.Buckets){
+                long count = keyBucket.DocCount ?? 0;
+                string key = keyBucket.Key;
+
+                var label = "";
+                var labelBuckets = keyBucket.Terms($"{field}_label").Buckets;
+                if (labelBuckets.Count > 0)
+                {
+                    label = labelBuckets.First().Key;
+                }
+
+                yield return new KeyLabelAggResult()
+                {
+                    Key = key,
+                    Label = label,
+                    Count = count
+                };
+            }
+        } 
+
+        private IEnumerable<KeyLabelAggResult> ExtractComplexAggs(string field, ISearchResponse<Resource> res)  {
+            throw new NotImplementedException();
+        } 
+
 
         /// <summary>
         /// Gets the simple aggregation "query"

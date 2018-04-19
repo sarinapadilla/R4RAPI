@@ -28,4 +28,12 @@
     <Folder Include="Tests\Services\TestDataObjects\ResourceAggSvc\" />
     <Folder Include="TestData\ESResAggSvcData\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

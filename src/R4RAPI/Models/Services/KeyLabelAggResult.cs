@@ -24,7 +24,7 @@ namespace R4RAPI.Models
         /// Gets or sets the number of records that this facet would match.
         /// </summary>
         /// <value>The count.</value>
-        public int Count { get; set; }
+        public long Count { get; set; }
 
     }
 }

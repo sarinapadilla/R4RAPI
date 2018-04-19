@@ -30,20 +30,20 @@ namespace R4RAPI.Test.Services
                 {
                     ""size"": 0,
                     ""aggs"": {
-                        ""researchType_agg"": {
+                        ""researchTypes_agg"": {
                             ""nested"": {
-                                ""path"": ""researchType""
+                                ""path"": ""researchTypes""
                             },
                             ""aggs"": {
-                                ""researchType_key"": {
+                                ""researchTypes_key"": {
                                     ""terms"": {
-                                        ""field"": ""researchType.key"",
+                                        ""field"": ""researchTypes.key"",
                                         ""size"": 999
                                     },
                                     ""aggs"": {
-                                        ""researchType_label"": {
+                                        ""researchTypes_label"": {
                                             ""terms"": {
-                                                ""field"": ""researchType.label""
+                                                ""field"": ""researchTypes.label""
                                             }
                                         }
                                     }
@@ -65,7 +65,10 @@ namespace R4RAPI.Test.Services
             });
 
             ESResourceAggregationService aggSvc = GetAggService(conn);
-            KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchType", new ResourceQuery());
+            try
+            {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
+            } catch (Exception ex) {} //We don't care how it processes the results...
 
 
             Assert.Equal(expectedPath, actualPath);
@@ -78,15 +81,48 @@ namespace R4RAPI.Test.Services
         /// Tests non-nested aggregation without query
         /// THIS TEST IS FOR MAKING SURE THE RESULTS ARE MAPPED CORRECTLY
         /// </summary>
-        //[Fact]
-        //public void GetKeyLabelAggregation_EmptyQuery() {
-        //Create new ESRegAggConnection...
+        [Fact]
+        public void GetKeyLabelAggregation_EmptyQuery() {
+            //Create new ESRegAggConnection...
 
-        //    IConnection conn = new ESResAggSvcConnection("blah");
+            IConnection conn = new ESResAggSvcConnection("ResearchTypes_EmptyQuery");
 
-        //    ESResourceAggregationService aggSvc = GetAggService(conn);
+            //Expected Aggs
+            KeyLabelAggResult[] expectedAggs = new KeyLabelAggResult[] {
+                new KeyLabelAggResult() {
+                    Key = "basic",
+                    Label = "Basic",
+                    Count = 94
+                },
+                new KeyLabelAggResult() {
+                    Key = "translational",
+                    Label = "Translational",
+                    Count = 66
+                },
+                new KeyLabelAggResult() {
+                    Key = "clinical_trials",
+                    Label = "Clinical Trials",
+                    Count = 42
+                },
+                new KeyLabelAggResult() {
+                    Key = "epidemiologic",
+                    Label = "Epidemiologic",
+                    Count = 26
+                },
+                new KeyLabelAggResult() {
+                    Key = "clinical",
+                    Label = "Clinical",
+                    Count = 5
+                }
+            };
 
-        //}
+            ESResourceAggregationService aggSvc = GetAggService(conn);
+            KeyLabelAggResult[] actualAggs = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
+
+            //Order does matter here, so we can compare the arrays
+            Assert.Equal(expectedAggs, actualAggs, new KeyLabelAggResultComparer());
+
+        }
         #endregion
 
         private ESResourceAggregationService GetAggService(IConnection connection)
