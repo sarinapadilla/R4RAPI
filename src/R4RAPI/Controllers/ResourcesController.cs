@@ -29,16 +29,19 @@ namespace R4RAPI.Controllers
 
         private IHostingEnvironment _environment;
         private readonly ILogger _logger;
-        private readonly ElasticsearchOptions _esOptions;
-        private readonly ESResourceQueryService _queryService;
+        private readonly IResourceQueryService _queryService;
+        private readonly IResourceAggregationService _aggService;
 
-        public ResourcesController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IOptions<ElasticsearchOptions> esOptionsAccessor, ESResourceQueryService queryService)
+        public ResourcesController(
+            IHostingEnvironment environment, 
+            ILogger<ResourcesController> logger, 
+            IResourceQueryService queryService, 
+            IResourceAggregationService aggService)
         {
             _environment = environment;
             _logger = logger;
-            _esOptions = esOptionsAccessor.Value;
             _queryService = queryService;
-
+            _aggService = aggService;
         }
 
         [HttpGet]
@@ -78,77 +81,100 @@ namespace R4RAPI.Controllers
             }
 
             // Build resource query object using params
-            ResourceQuery resQuery = new ResourceQuery();
+            ResourceQuery resourceQuery = new ResourceQuery();
 
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                resQuery.Keyword = keyword;
+                resourceQuery.Keyword = keyword;
             }
 
             if (!IsNullOrEmpty(toolTypes))
             {
-                resQuery.Filters.Add("toolTypes.type", toolTypes);
+                resourceQuery.Filters.Add("toolTypes.type", toolTypes);
             }
 
             if (!IsNullOrEmpty(subTypes))
             {
-                resQuery.Filters.Add("toolTypes.subtype", subTypes);
+                resourceQuery.Filters.Add("toolTypes.subtype", subTypes);
             }
 
             if (!IsNullOrEmpty(researchAreas))
             {
-                resQuery.Filters.Add("researchAreas", researchAreas);
+                resourceQuery.Filters.Add("researchAreas", researchAreas);
             }
 
             if (!IsNullOrEmpty(researchTypes))
             {
-                resQuery.Filters.Add("researchTypes", researchTypes);
+                resourceQuery.Filters.Add("researchTypes", researchTypes);
             }
 
             if (!IsNullOrEmpty(includeFields))
             {
-                resQuery.Filters.Add("include", includeFields);
+                resourceQuery.Filters.Add("include", includeFields);
             }
 
             if (!IsNullOrEmpty(includeFacets))
             {
-                resQuery.Filters.Add("includeFacets", includeFacets);
+                resourceQuery.Filters.Add("includeFacets", includeFacets);
             }
 
-            ResourceQueryResult queryResults = null;
+            // Perform query for resources (using params if they're given)
+            ResourceQueryResult queryResults = _queryService.QueryResources(resourceQuery, size, from, includeFields);
 
-            // Perform query for resources if a resource query is built
-            if (!string.IsNullOrWhiteSpace(resQuery.Keyword) ||
-                !IsNullOrEmpty(toolTypes) ||
-                !IsNullOrEmpty(subTypes) ||
-                !IsNullOrEmpty(researchAreas) ||
-                !IsNullOrEmpty(researchTypes)
-            )
+            // Perform query for Research Areas and Research Types aggregations
+            KeyLabelAggResult[] raAggResults = _aggService.GetKeyLabelAggregation("researchAreas", resourceQuery);
+            KeyLabelAggResult[] rtAggResults = _aggService.GetKeyLabelAggregation("researchTypes", resourceQuery);
+
+            // Convert query results into ResourceResults
+            ResourceResults results = new ResourceResults();
+            if(queryResults != null)
             {
-                queryResults = _queryService.QueryResources(resQuery, size, from, includeFields);
+                PageMetaData meta = new PageMetaData();
+                meta.TotalResults = queryResults.TotalResults;
+                meta.OriginalQuery = resourceQuery.ToString();
+                results.Meta = meta;
+                results.Results = queryResults.Results;
             }
 
-            // TODO: Combine Resources (if requested) and Facets into one ResourceResult to return
-
-
-            return new ResourceResults();
-
-            /*string webRoot = _environment.WebRootPath;
-            string filePath = Path.Combine(webRoot, _file);
-            try
+            // Convert aggregations into facet items/facets
+            List<Facet> facets = new List<Facet>();
+            if (raAggResults != null)
             {
-                using (StreamReader r = new StreamReader(filePath))
+                Facet raFacet = new Facet();
+                raFacet.Param = "researchAreas";
+                raFacet.Title = "Research Areas";
+
+                var raFacetItems = raAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
+                raFacet.Items = raFacetItems.ToArray();
+
+                facets.Add(raFacet);
+            }
+            
+            if(rtAggResults != null)
+            {
+                Facet rtFacet = new Facet();
+                rtFacet.Param = "researchTypes";
+                rtFacet.Title = "Research Types";
+
+                var rtFacetItems = rtAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
+                rtFacet.Items = rtFacetItems.ToArray();
+
+                /*for (int i = 0; i < rtAggResults.Count(); i++)
                 {
-                    string json = r.ReadToEnd();
-                    ResourceResults results = JsonConvert.DeserializeObject<ResourceResults>(json);
-                    return results;
-                }
+                    FacetItem rtItem = new FacetItem();
+                    rtItem.Key = rtAggResults[i].Key;
+                    rtItem.Label = rtAggResults[i].Label;
+                    rtItem.Count = Convert.ToInt32(rtAggResults[i].Count);
+                    rtFacet.Items[i] = rtItem;
+                }*/
+
+                facets.Add(rtFacet);
             }
-            catch
-            {
-                //log.ErrorFormat("GetAll(): Path {0} not found.", ex, filePath);
-                return null;
-            }*/
+
+            // Add facets to ResourceResults
+            results.Facets = facets.ToArray<Facet>();
+
+            return results;
         }
 
         static bool IsNullOrEmpty(string[] myStringArray)

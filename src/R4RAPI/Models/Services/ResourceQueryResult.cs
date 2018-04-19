@@ -7,7 +7,7 @@ namespace R4RAPI.Models
 {
     public class ResourceQueryResult
     {
-        public string TotalResults { get; set; }
+        public int TotalResults { get; set; }
 
         public Resource[] Results { get; set; }
     }

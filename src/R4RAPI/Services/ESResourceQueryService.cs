@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nest;
 using R4RAPI.Models;
 
@@ -22,10 +23,10 @@ namespace R4RAPI.Services
         /// </summary>
         /// <param name="client">A configured Elasticsearch client</param>
         /// <param name="logger">A logger for logging.</param>
-        public ESResourceQueryService(IElasticClient client, R4RAPIOptions apiOptions, ILogger<ESResourceQueryService> logger)
+        public ESResourceQueryService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceQueryService> logger)
         {
             this._elasticClient = client;
-            this._apiOptions = apiOptions;
+            this._apiOptions = apiOptionsAccessor.Value;
             this._logger = logger;
         }
 
@@ -83,19 +84,36 @@ namespace R4RAPI.Services
             string[] includeFields = null
             )
         {
+            ResourceQueryResult queryResults = new ResourceQueryResult();
+
             Indices index = Indices.Index(new string[] { "r4r_v1" });
             Types types = Types.Type(new string[] { "resource" });
-            SearchRequest req = new SearchRequest(index, types)
+            SearchRequest request = new SearchRequest(index, types)
             {
-
                 Size = size,
                 From = from, 
-                
-                
             };
 
-            ResourceQueryResult resResults = new ResourceQueryResult();
-            return resResults;
+            var response = this._elasticClient.Search<Resource>(request);
+
+            List<Resource> resourceResults = new List<Resource>();
+
+            if (!response.IsValid)
+            {
+                this._logger.LogError("Bad request.");
+            }
+
+            if (response.Total > 0)
+            {
+                foreach (Resource res in response.Documents)
+                {
+                    resourceResults.Add(res);
+                    queryResults.Results = resourceResults.ToArray();
+                    queryResults.TotalResults = Convert.ToInt32(response.Total);
+                }
+            }
+
+            return queryResults;
         }
     }
 }
