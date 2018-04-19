@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using R4RAPI.Models;
+using R4RAPI.Services;
 using Nest;
 using Elasticsearch.Net;
-using Microsoft.AspNetCore.Diagnostics;
-using System.Text;
 
 namespace R4RAPI
 {
@@ -67,6 +68,8 @@ namespace R4RAPI
                 return new ElasticClient(settings);
             });
 
+            services.AddSingleton<IResourceQueryService, ESResourceQueryService>();
+            services.AddSingleton<IResourceAggregationService, ESResourceAggregationService>();
 
             services.AddMvc();
         }

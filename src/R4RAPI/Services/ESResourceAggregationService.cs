@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Nest;
 using R4RAPI.Models;
+using Nest;
 
 namespace R4RAPI.Services
 {

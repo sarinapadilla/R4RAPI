@@ -31,7 +31,13 @@ namespace R4RAPI.Controllers
         [HttpGet("{id}")]
         public Resource GetById(int id)
         {
-            Resource result =  _queryService.Get(id.ToString());
+            Resource result = _queryService.Get(id.ToString());
+
+            if(result == null)
+            {
+                _logger.LogError("Could not fetch resource for ID " + id);
+                throw new Exception("Could not fetch resource for ID " + id);
+            }
 
             return result;
         }

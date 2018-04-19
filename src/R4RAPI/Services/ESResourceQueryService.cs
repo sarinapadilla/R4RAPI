@@ -4,31 +4,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Nest;
 using R4RAPI.Models;
+using Nest;
 
 namespace R4RAPI.Services
 {
     /// <summary>
     /// Service for fetching R4R Resources
     /// </summary>
-    public class ESResourceQueryService : IResourceQueryService
+    public class ESResourceQueryService : ESResourceServiceBase, IResourceQueryService
     {
-        private IElasticClient _elasticClient;
-        private R4RAPIOptions _apiOptions;
-        private readonly ILogger<ESResourceQueryService> _logger;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="T:R4RAPI.Services.ESResourceQueryService"/> class.
         /// </summary>
         /// <param name="client">A configured Elasticsearch client</param>
+        /// <param name="apiOptionsAccessor">An accessor for the API options</param>
         /// <param name="logger">A logger for logging.</param>
-        public ESResourceQueryService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceQueryService> logger)
-        {
-            this._elasticClient = client;
-            this._apiOptions = apiOptionsAccessor.Value;
-            this._logger = logger;
-        }
+        public ESResourceQueryService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceAggregationService> logger)
+            : base(client, apiOptionsAccessor, logger) { }
 
         /// <summary>
         /// Gets a resource from the API via its ID.
@@ -39,31 +32,53 @@ namespace R4RAPI.Services
         {
             Resource resResult = null;
 
-            // If the given ID is null or empty, throw an exception
+            // If the given ID is null or empty, throw an exception.
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentNullException("The resource identifier is null or an empty string.");
             }
 
-            // Validate if given ID is correctly formatted as an int
+            // Validate if given ID is correctly formatted as an int.
             int resID;
             bool validID = int.TryParse(id, out resID);
 
             if(validID)
             {
-                var response = _elasticClient.Get<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
-                if(response.Found && response.IsValid)
+                try
                 {
-                    resResult = response.Source;
+                    // Fetch the resource with the given ID from the API.
+                    var response = _elasticClient.Get<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
+
+                    // If the API's response isn't valid, throw an error and return 500 status code.
+                    if (!response.IsValid)
+                    {
+                        _logger.LogError("Elasicsearch response is not valid. Resource ID " + resID);
+                        throw new APIErrorException(500, "Errors occurred.");
+                    }
+
+                    // If the API finds the resource, return the resource.
+                    if (response.Found && response.IsValid)
+                    {
+                        resResult = response.Source;
+                    }
+                    // If the API cannot find the resource, throw an error and return 404 status code.
+                    else if (!response.Found && response.IsValid)
+                    {
+                        _logger.LogError("Elasticsearch could not find resource with ID " + resID);
+                        throw new APIErrorException(404, "Resource not found.");
+                    }
                 }
-                else if (response.Found && !response.IsValid)
+                catch(Exception ex)
                 {
-                    this._logger.LogError("Bad request.");
+                    // Throw an exception if an error occurs.
+                    _logger.LogError("Could not fetch resource ID " + resID);
+                    throw new Exception("Could not fetch resource ID " + resID, ex);
                 }
-                else if (!response.Found && response.IsValid)
-                {
-                    this._logger.LogError("Resource not found.");
-                }
+            }
+            else
+            {
+                // Throw an exception if the given ID is invalid (not an int).
+                throw new ArgumentException("The resource identifier is invalid.");
             }
 
             return resResult;
@@ -86,6 +101,7 @@ namespace R4RAPI.Services
         {
             ResourceQueryResult queryResults = new ResourceQueryResult();
 
+            // Set up the SearchRequest to send to the API.
             Indices index = Indices.Index(new string[] { "r4r_v1" });
             Types types = Types.Type(new string[] { "resource" });
             SearchRequest request = new SearchRequest(index, types)
@@ -94,23 +110,37 @@ namespace R4RAPI.Services
                 From = from, 
             };
 
-            var response = this._elasticClient.Search<Resource>(request);
-
-            List<Resource> resourceResults = new List<Resource>();
-
-            if (!response.IsValid)
+            try
             {
-                this._logger.LogError("Bad request.");
-            }
+                // Fetch the resources that match the given query and parameters from the API.
+                var response = _elasticClient.Search<Resource>(request);
 
-            if (response.Total > 0)
-            {
-                foreach (Resource res in response.Documents)
+                // If the API's response isn't valid, throw an error and return 500 status code.
+                if (!response.IsValid)
                 {
-                    resourceResults.Add(res);
+                    _logger.LogError("Bad request.");
+                    throw new APIErrorException(500, "Errors occurred.");
+                }
+
+                // If the API finds resources matching the params, build the ResourceQueryResult to return.
+                if (response.Total > 0)
+                {
+                    // Build the array of resources for the returned restult.
+                    List<Resource> resourceResults = new List<Resource>();
+                    foreach (Resource res in response.Documents)
+                    {
+                        resourceResults.Add(res);
+                    }
+
                     queryResults.Results = resourceResults.ToArray();
                     queryResults.TotalResults = Convert.ToInt32(response.Total);
                 }
+            }
+            catch (Exception ex)
+            {
+                //TODO: Update error logger to include query
+                _logger.LogError("Could not fetch resources for query.");
+                throw new Exception("Could not fetch resources for query.", ex);
             }
 
             return queryResults;

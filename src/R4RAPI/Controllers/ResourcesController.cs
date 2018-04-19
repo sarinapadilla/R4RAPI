@@ -159,15 +159,6 @@ namespace R4RAPI.Controllers
                 var rtFacetItems = rtAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
                 rtFacet.Items = rtFacetItems.ToArray();
 
-                /*for (int i = 0; i < rtAggResults.Count(); i++)
-                {
-                    FacetItem rtItem = new FacetItem();
-                    rtItem.Key = rtAggResults[i].Key;
-                    rtItem.Label = rtAggResults[i].Label;
-                    rtItem.Count = Convert.ToInt32(rtAggResults[i].Count);
-                    rtFacet.Items[i] = rtItem;
-                }*/
-
                 facets.Add(rtFacet);
             }
 
