@@ -11,6 +11,8 @@ using Microsoft.Extensions.Options;
 using R4RAPI.Models;
 using Nest;
 using Elasticsearch.Net;
+using Microsoft.AspNetCore.Diagnostics;
+using System.Text;
 
 namespace R4RAPI
 {
@@ -76,6 +78,45 @@ namespace R4RAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // Allow use from anywhere.
+            app.UseCors(builder => builder.AllowAnyOrigin());
+
+            // This is equivelant to the old Global.asax OnError event handler.
+            // It will handle any unhandled exception and return a status code to the
+            // caller.  IF the error is of type APIErrorException then we will also return
+            // a message along with the status code.  (Otherwise we )
+            app.UseExceptionHandler(errorApp => {
+                errorApp.Run(async context => {
+                    context.Response.StatusCode = 500; // or another Status accordingly to Exception Type
+                    context.Response.ContentType = "application/json";
+
+                    var error = context.Features.Get<IExceptionHandlerFeature>();
+
+                    if (error != null)
+                    {
+                        var ex = error.Error;
+
+                        //Unhandled exceptions may not be sanitized, so we will not
+                        //display the issue.
+                        string message = "Errors have occurred.  Type: " + ex.GetType().ToString();
+
+                        //Our own exceptions should be sanitized enough.                        
+                        if (ex is APIErrorException)
+                        {
+                            context.Response.StatusCode = ((APIErrorException)ex).HttpStatusCode;
+                            message = ex.Message;
+                        }
+
+                        byte[] contents = Encoding.UTF8.GetBytes(new ErrorMessage()
+                        {
+                            Message = message
+                        }.ToString());
+
+                        await context.Response.Body.WriteAsync(contents, 0, contents.Length);
+                    }
+                });
+            });
 
             app.UseMvc();
         }
