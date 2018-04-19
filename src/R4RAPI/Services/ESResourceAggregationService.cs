@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nest;
 using R4RAPI.Models;
 
@@ -10,22 +11,16 @@ namespace R4RAPI.Services
     /// <summary>
     /// Service for fetching R4R Resource Aggregations
     /// </summary>
-    public class ESResourceAggregationService : IResourceAggregationService
+    public class ESResourceAggregationService : ESResourceServiceBase, IResourceAggregationService
     {
-
-        private IElasticClient _elasticClient;
-        private readonly ILogger<ESResourceAggregationService> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:R4RAPI.Services.ESResourceAggregationService"/> class.
         /// </summary>
         /// <param name="client">A configured Elasticsearch client</param>
         /// <param name="logger">A logger for logging.</param>
-        public ESResourceAggregationService(IElasticClient client, ILogger<ESResourceAggregationService> logger)
-        {
-            this._elasticClient = client;
-            this._logger = logger;
-        }
+        public ESResourceAggregationService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceAggregationService> logger) 
+            : base(client, apiOptionsAccessor, logger) {}
 
         /// <summary>
         /// Gets the key label aggregation for a field
@@ -42,7 +37,7 @@ namespace R4RAPI.Services
                 throw new ArgumentNullException(nameof(query));
 
             //TODO: Config the index
-            Indices index = Indices.Index(new string[] {"r4r_v1"});
+            Indices index = Indices.Index(new string[] {this._apiOptions.AliasName});
             Types types = Types.Type(new string[] { "resource" });
             SearchRequest req = new SearchRequest(index, types)
             {

@@ -9,12 +9,12 @@ using Elasticsearch.Net;
 using Nest;
 
 using NCI.OCPL.Utils.Testing;
-using Microsoft.Extensions.Logging.Testing;
+
 using Newtonsoft.Json.Linq;
 
 namespace R4RAPI.Test.Services
 {
-    public class ESResourceAggregationServiceTests
+    public class ESResourceAggregationServiceTests : TestESResourceServiceBase
     {
 
         #region Test Query Building
@@ -64,7 +64,7 @@ namespace R4RAPI.Test.Services
                 actualRequest = conn.GetRequestPost(req);
             });
 
-            ESResourceAggregationService aggSvc = GetAggService(conn);
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
             try
             {
                 KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
@@ -116,7 +116,7 @@ namespace R4RAPI.Test.Services
                 }
             };
 
-            ESResourceAggregationService aggSvc = GetAggService(conn);
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
             KeyLabelAggResult[] actualAggs = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
 
             //Order does matter here, so we can compare the arrays
@@ -125,19 +125,6 @@ namespace R4RAPI.Test.Services
         }
         #endregion
 
-        private ESResourceAggregationService GetAggService(IConnection connection)
-        {
-            //While this has a URI, it does not matter, an InMemoryConnection never requests
-            //from the server.
-            var pool = new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
 
-            var connectionSettings = new ConnectionSettings(pool, connection);
-            IElasticClient client = new ElasticClient(connectionSettings);
-
-            //We don't need any options yet
-            //IOptions<CGBBIndexOptions> config = GetMockConfig();
-
-            return new ESResourceAggregationService(client, new NullLogger<ESResourceAggregationService>());
-        }
     }
 }
