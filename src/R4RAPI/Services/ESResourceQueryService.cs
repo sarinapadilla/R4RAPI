@@ -78,18 +78,23 @@ namespace R4RAPI.Services
         /// <returns>Resource query result</returns>
         public ResourceQueryResult QueryResources(
             ResourceQuery query,
-            int size = 10,
+            int size = 20,
             int from = 0,
             string[] includeFields = null
             )
         {
-            ResourceQueryResult resResults = null;
+            Indices index = Indices.Index(new string[] { "r4r_v1" });
+            Types types = Types.Type(new string[] { "resource" });
+            SearchRequest req = new SearchRequest(index, types)
+            {
 
-            //Handle Null include/exclude field
-            query = query ?? new ResourceQuery();
+                Size = size,
+                From = from, 
+                
+                
+            };
 
-            //var response = _elasticClient.Search<Resource>();
-
+            ResourceQueryResult resResults = new ResourceQueryResult();
             return resResults;
         }
     }
