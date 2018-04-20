@@ -14,6 +14,9 @@ using R4RAPI.Models;
 using R4RAPI.Services;
 using Nest;
 using Elasticsearch.Net;
+using NSwag.AspNetCore;
+using NJsonSchema;
+using System.Reflection;
 
 namespace R4RAPI
 {
@@ -81,6 +84,13 @@ namespace R4RAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles();
+            // Enable the Swagger UI middleware and the Swagger generator
+            app.UseSwaggerUi3(typeof(Startup).GetTypeInfo().Assembly, settings =>
+            {
+                settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
+            });
 
             // Allow use from anywhere.
             app.UseCors(builder => builder.AllowAnyOrigin());

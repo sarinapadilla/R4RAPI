@@ -43,9 +43,22 @@ namespace R4RAPI.Controllers
             _aggService = aggService;
         }
 
+        /// <summary>
+        /// Searches all resources
+        /// </summary>
+        /// <returns>The Resources and available facets that match the query</returns>
+        /// <param name="keyword">Full-text search keyword</param>
+        /// <param name="toolTypes">One or more toolTypes keys to filter by</param>
+        /// <param name="subTypes">One or more toolSubtypes keys to filter by</param>
+        /// <param name="researchAreas">One or more researchArea keys to filter by</param>
+        /// <param name="researchTypes">One or more researchTypes keys to filter by</param>
+        /// <param name="includeFields">Resource fields to include. (When empty all are returned)</param>
+        /// <param name="includeFacets">Available Facets to return. (When empty all are returned)</param>
+        /// <param name="size">The number of resources to return</param>
+        /// <param name="from">The offset of the resources to return</param>
         [HttpGet]
         public ResourceResults GetAll(
-            [FromQuery(Name = "q")] string keyword,
+            [FromQuery(Name = "q")] string keyword = null,
             [FromQuery(Name = "toolType")] string[] toolTypes = null,
             [FromQuery(Name = "toolSubtype")] string[] subTypes = null,
             [FromQuery(Name = "researchAreas")] string[] researchAreas = null,
