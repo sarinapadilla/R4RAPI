@@ -25,7 +25,10 @@ namespace R4RAPI.Models
         public string Description { get; set; }
 
         [Nested(Name = "toolTypes")]
-        public ToolType[] ToolTypes { get; set; }
+        public KeyLabel[] ToolTypes { get; set; }
+
+        [Nested(Name = "toolSubtypes")]
+        public ToolSubtype[] ToolSubtypes { get; set; }
 
         [Nested(Name = "researchAreas")]
         public KeyLabel[] ResearchAreas { get; set; }

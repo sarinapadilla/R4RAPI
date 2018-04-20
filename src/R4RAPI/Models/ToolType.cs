@@ -6,12 +6,9 @@ using Nest;
 
 namespace R4RAPI.Models
 {
-    public class ToolType
+    public class ToolSubtype : KeyLabel
     {
-        [Nested(Name = "type")]
-        public KeyLabel Type { get; set; }
-
-        [Nested(Name = "subtype")]
-        public KeyLabel SubType { get; set; }
+        [Nested(Name = "parentKey")]
+        public string ParentKey { get; set; }
     }
 }

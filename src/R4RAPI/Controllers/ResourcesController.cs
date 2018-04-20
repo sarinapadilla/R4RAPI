@@ -46,8 +46,8 @@ namespace R4RAPI.Controllers
         [HttpGet]
         public ResourceResults GetAll(
             [FromQuery(Name = "q")] string keyword,
-            [FromQuery(Name = "toolType.type")] string[] toolTypes = null,
-            [FromQuery(Name = "toolType.subtype")] string[] subTypes = null,
+            [FromQuery(Name = "toolType")] string[] toolTypes = null,
+            [FromQuery(Name = "toolSubtype")] string[] subTypes = null,
             [FromQuery(Name = "researchAreas")] string[] researchAreas = null,
             [FromQuery(Name = "researchTypes")] string[] researchTypes = null,
             [FromQuery(Name = "include")] string[] includeFields = null,
@@ -89,12 +89,12 @@ namespace R4RAPI.Controllers
 
             if (!IsNullOrEmpty(toolTypes))
             {
-                resourceQuery.Filters.Add("toolTypes.type", toolTypes);
+                resourceQuery.Filters.Add("toolTypes", toolTypes);
             }
 
             if (!IsNullOrEmpty(subTypes))
             {
-                resourceQuery.Filters.Add("toolTypes.subtype", subTypes);
+                resourceQuery.Filters.Add("toolSubtypes", subTypes);
             }
 
             if (!IsNullOrEmpty(researchAreas))
@@ -123,6 +123,7 @@ namespace R4RAPI.Controllers
             // Perform query for Research Areas and Research Types aggregations
             KeyLabelAggResult[] raAggResults = _aggService.GetKeyLabelAggregation("researchAreas", resourceQuery);
             KeyLabelAggResult[] rtAggResults = _aggService.GetKeyLabelAggregation("researchTypes", resourceQuery);
+            KeyLabelAggResult[] ttAggResults = _aggService.GetKeyLabelAggregation("toolTypes", resourceQuery);
 
             // Convert query results into ResourceResults
             ResourceResults results = new ResourceResults();
@@ -159,6 +160,18 @@ namespace R4RAPI.Controllers
                 rtFacet.Items = rtFacetItems.ToArray();
 
                 facets.Add(rtFacet);
+            }
+
+            if (ttAggResults != null)
+            {
+                Facet ttFacet = new Facet();
+                ttFacet.Param = "toolTypes";
+                ttFacet.Title = "Tool Types";
+
+                var ttFacetItems = ttAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
+                ttFacet.Items = ttFacetItems.ToArray();
+
+                facets.Add(ttFacet);
             }
 
             // Add facets to ResourceResults

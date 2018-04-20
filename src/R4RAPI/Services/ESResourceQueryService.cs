@@ -102,7 +102,7 @@ namespace R4RAPI.Services
             ResourceQueryResult queryResults = new ResourceQueryResult();
 
             // Set up the SearchRequest to send to the API.
-            Indices index = Indices.Index(new string[] { "r4r_v1" });
+            Indices index = Indices.Index(new string[] { this._apiOptions.AliasName });
             Types types = Types.Type(new string[] { "resource" });
             SearchRequest request = new SearchRequest(index, types)
             {
