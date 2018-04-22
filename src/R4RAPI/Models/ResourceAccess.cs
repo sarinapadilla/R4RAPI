@@ -6,11 +6,22 @@ using Nest;
 
 namespace R4RAPI.Models
 {
+    /// <summary>
+    /// Describes the information about the resource access of a resource
+    /// </summary>
     public class ResourceAccess
     {
+        /// <summary>
+        /// The type of resource access
+        /// </summary>
+        /// <value>The type.</value>
         [Keyword(Name = "type")]
         public string Type { get; set; }
 
+        /// <summary>
+        /// The notes about the resource access
+        /// </summary>
+        /// <value>The notes.</value>
         [Keyword(Name = "notes")]
         public string Notes { get; set; }
     }
