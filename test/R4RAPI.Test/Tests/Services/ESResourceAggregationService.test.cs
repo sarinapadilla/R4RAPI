@@ -101,6 +101,89 @@ namespace R4RAPI.Test.Services
         }
 
         [Fact]
+        public void GetKLA_Build_SubType_withMultitype()
+        {
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                    ""size"": 0,
+                    ""aggs"": {
+                        ""toolSubtypes_agg"": {
+                            ""nested"": {
+                                ""path"": ""toolSubtypes""
+                            },
+                            ""aggs"": {
+                                ""toolSubtypes_filter"": {
+                                    ""filter"": {
+                                        ""bool"": {
+                                            ""should"": [                                                
+                                                { ""term"": { ""toolSubtypes.parentKey"": { ""value"": ""datasets_databases"" } } },
+                                                { ""term"": { ""toolSubtypes.parentKey"": { ""value"": ""anothertype"" } } }
+                                            ],
+                                            ""minimum_should_match"": 1                                     
+                                        }
+                                    },
+                                    ""aggs"": {
+                                        ""toolSubtypes_key"": {
+                                            ""terms"": {
+                                                ""field"": ""toolSubtypes.key"",
+                                                ""size"": 999
+                                            },
+                                            ""aggs"": {
+                                                ""toolSubtypes_label"": {
+                                                    ""terms"": {
+                                                        ""field"": ""toolSubtypes.label""
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } 
+            ");
+            /*
+            */
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+            try
+            {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation(
+                    "toolSubtypes",
+                    new ResourceQuery
+                    {
+                        Filters = new Dictionary<string, string[]> {
+                        { "toolTypes", new string[] { "datasets_databases", "anothertype" } }
+                        }
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                int i = 1;
+            } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest);
+        }
+
+        [Fact]
         public void GetKeyLabelAggregation_Build_EmptyQuery() {
             //Create new ESRegAggConnection...
 
