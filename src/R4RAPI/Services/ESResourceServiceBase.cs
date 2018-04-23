@@ -42,5 +42,60 @@ namespace R4RAPI.Services
             this._apiOptions = apiOptionsAccessor.Value;
             this._logger = logger;
         }
+
+        /// <summary>
+        /// Gets a query object used for filtering a field given one or more filters
+        /// </summary>
+        /// <remarks>
+        /// When more than one filter is used we must use a Bool query to wrap the
+        /// TermQuery objects that represent the filters. When only one filter is used, 
+        /// then we only need to return a single TermQuery.
+        /// </remarks>
+        /// <returns>The QueryContainer to be used by the filter.</returns>
+        /// <param name="field">The field to filter on.</param>
+        /// <param name="filters">The filters to turn into the query</param>
+        protected QueryContainer GetQueryForFilterField(string field, string[] filters) {
+            QueryContainer query = null;
+
+            if (filters.Length == 0)
+            {
+                throw new ArgumentException("Filters must contain at least one item");    
+            }
+
+            if (filters.Length == 1)
+            {
+                //There is only one, so it can just be a term query.
+                query = GetQueryForField(field, filters[0]);
+            }
+            else
+            {
+                query = new BoolQuery { 
+                    Should = from filter in filters
+                                select (QueryContainer)GetQueryForField(field, filter),
+                    MinimumShouldMatch = 1
+                };
+            }
+
+            return query;
+        }
+
+        /// <summary>
+        /// Gets a TermQuery for a given field.
+        /// </summary>
+        /// <returns>The query for field.</returns>
+        /// <param name="field">Field.</param>
+        /// <param name="value">Value.</param>
+        protected TermQuery GetQueryForField(string field, string value, double boost = 0)
+        {            
+            TermQuery query = new TermQuery {
+                Field = field,
+                Value = value
+            };
+
+            if (boost > 0)
+                query.Boost = boost;
+
+            return query;
+        }
     }
 }

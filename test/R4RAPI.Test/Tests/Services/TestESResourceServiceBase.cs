@@ -49,13 +49,58 @@ namespace R4RAPI.Test.Services
         /// <returns></returns>
         protected IOptions<R4RAPIOptions> GetMockConfig()
         {
+            var options = new R4RAPIOptions
+            {
+                AliasName = "r4r_v1",
+                AvailableFacets = new Dictionary<string, R4RAPIOptions.FacetConfig> {
+                    {
+                        "toolTypes", new R4RAPIOptions.FacetConfig {
+                            FilterName = "toolTypes",
+                            Label = "Tool Types",
+                            FacetType = R4RAPIOptions.FacetTypes.Single,
+                            IncludeInDefault = true
+                        }
+                    },
+                    {
+                        "toolSubtypes", new R4RAPIOptions.FacetConfig {
+                            FilterName= "toolSubtypes",
+                            Label= "Tool Sub-Types",
+                            FacetType= R4RAPIOptions.FacetTypes.Multiple,
+                            IncludeInDefault= true,
+                            RequiresFilter= "toolTypes"
+                        }
+                    },
+                    {
+                        "researchAreas", new R4RAPIOptions.FacetConfig {
+                            FilterName= "researchAreas",
+                            Label= "Research Areas",
+                            FacetType= R4RAPIOptions.FacetTypes.Multiple,
+                            IncludeInDefault= true
+                        }
+                    },
+                    {
+                        "researchTypes", new R4RAPIOptions.FacetConfig {
+                            FilterName= "researchTypes",
+                            Label= "Research Types",
+                            FacetType= R4RAPIOptions.FacetTypes.Multiple,
+                            IncludeInDefault= true
+                        }
+                    },
+                    {
+                        "docs", new R4RAPIOptions.FacetConfig {
+                            FilterName= "docs",
+                            Label= "Division, Offices, and Centers",
+                            FacetType= R4RAPIOptions.FacetTypes.Multiple,
+                            IncludeInDefault= false
+                        }
+                    }
+                }
+            };
+
             Moq.Mock<IOptions<R4RAPIOptions>> config = new Mock<IOptions<R4RAPIOptions>>();
             config
                 .SetupGet(o => o.Value)
-                .Returns(new R4RAPIOptions()
-                {
-                    AliasName = "r4r_v1"
-                });
+                .Returns(options);
 
             return config.Object;
         }
