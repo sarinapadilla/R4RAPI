@@ -17,6 +17,9 @@ using Elasticsearch.Net;
 using NSwag.AspNetCore;
 using NJsonSchema;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace R4RAPI
 {
@@ -49,6 +52,15 @@ namespace R4RAPI
         {
             services.AddLogging();
             services.AddOptions();
+
+            //This allows us to easily generate URLs to routes
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(factory =>
+            {
+                var actionContext = factory.GetService<IActionContextAccessor>()
+                                           .ActionContext;
+                return new UrlHelper(actionContext);
+            });
 
             services.Configure<ElasticsearchOptions>(Configuration.GetSection("Elasticsearch"));
             services.Configure<R4RAPIOptions>(Configuration.GetSection("R4RAPI"));
@@ -105,6 +117,8 @@ namespace R4RAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+
 
             app.UseStaticFiles();
             // Enable the Swagger UI middleware and the Swagger generator
