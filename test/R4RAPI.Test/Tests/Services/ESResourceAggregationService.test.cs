@@ -68,7 +68,7 @@ namespace R4RAPI.Test.Services
             try
             {
                 KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery());
-            } catch (Exception ex) {} //We don't care how it processes the results...
+            } catch (Exception) {} //We don't care how it processes the results...
 
 
             Assert.Equal(expectedPath, actualPath);

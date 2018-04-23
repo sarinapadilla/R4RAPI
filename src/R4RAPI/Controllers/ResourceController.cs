@@ -12,6 +12,9 @@ using Newtonsoft.Json;
 
 namespace R4RAPI.Controllers
 {
+    /// <summary>
+    /// The Resource Enpoint Controller
+    /// </summary>
     [Produces("application/json")]
     [Route("resource")]
     public class ResourceController : Controller
@@ -20,6 +23,12 @@ namespace R4RAPI.Controllers
         private readonly ILogger _logger;
         private readonly IResourceQueryService _queryService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:R4RAPI.Controllers.ResourceController"/> class.
+        /// </summary>
+        /// <param name="environment">Environment.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="queryService">Query service.</param>
         public ResourceController(IHostingEnvironment environment, ILogger<ResourcesController> logger, IResourceQueryService queryService)
         {
             _environment = environment;
@@ -27,6 +36,11 @@ namespace R4RAPI.Controllers
             _queryService = queryService;
         }
 
+        /// <summary>
+        /// Gets a Resource by the identifier.
+        /// </summary>
+        /// <returns>The by identifier.</returns>
+        /// <param name="id">Identifier.</param>
         [HttpGet("{id}")]
         public Resource GetById(int id)
         {

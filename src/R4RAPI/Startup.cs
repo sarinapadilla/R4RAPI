@@ -20,15 +20,30 @@ using System.Reflection;
 
 namespace R4RAPI
 {
+    /// <summary>
+    /// The API Startup.
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:R4RAPI.Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">Configuration.</param>
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// Gets or sets the configuration.
+        /// </summary>
+        /// <value>The configuration.</value>
         public IConfiguration Configuration { get; set; }
 
+        /// <summary>
+        /// Configures the services.
+        /// </summary>
+        /// <param name="services">Services.</param>
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -77,6 +92,12 @@ namespace R4RAPI
             services.AddMvc();
         }
 
+        /// <summary>
+        /// Configure the specified app and env.
+        /// </summary>
+        /// <returns>The configure.</returns>
+        /// <param name="app">App.</param>
+        /// <param name="env">Env.</param>
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {

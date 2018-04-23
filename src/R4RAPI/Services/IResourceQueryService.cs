@@ -6,6 +6,9 @@ using R4RAPI.Models;
 
 namespace R4RAPI.Services
 {
+    /// <summary>
+    /// Interface for a Resource query service.
+    /// </summary>
     public interface IResourceQueryService
     {
         /// <summary>

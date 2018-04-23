@@ -14,16 +14,22 @@ using Newtonsoft.Json;
 
 namespace R4RAPI.Controllers
 {
+    /// <summary>
+    /// Controller for the Resources Endpoint
+    /// </summary>
     [Produces("application/json")]
     [Route("resources")]
     public class ResourcesController : Controller
     {
         //private static readonly string _file = "R4RData.txt";
+
+        /// <summary>
+        /// THIS SHOULD BE REMOVED IN LIEU OF THE CONFIG
+        /// </summary>
         public static readonly string[] DefaultFacets = {
             // These R4R facets appear in results:
             ""
             // These R4R facets DO NOT appear in results:
-            /// 
         };
 
         private IHostingEnvironment _environment;
@@ -31,6 +37,13 @@ namespace R4RAPI.Controllers
         private readonly IResourceQueryService _queryService;
         private readonly IResourceAggregationService _aggService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:R4RAPI.Controllers.ResourcesController"/> class.
+        /// </summary>
+        /// <param name="environment">Environment.</param>
+        /// <param name="logger">Logger.</param>
+        /// <param name="queryService">Query service.</param>
+        /// <param name="aggService">Agg service.</param>
         public ResourcesController(
             IHostingEnvironment environment, 
             ILogger<ResourcesController> logger, 

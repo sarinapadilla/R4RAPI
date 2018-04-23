@@ -18,6 +18,7 @@ namespace R4RAPI.Services
         /// Initializes a new instance of the <see cref="T:R4RAPI.Services.ESResourceAggregationService"/> class.
         /// </summary>
         /// <param name="client">A configured Elasticsearch client</param>
+        /// <param name="apiOptionsAccessor">The R4RAPIOptions Accessor</param>
         /// <param name="logger">A logger for logging.</param>
         public ESResourceAggregationService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceAggregationService> logger) 
             : base(client, apiOptionsAccessor, logger) {}

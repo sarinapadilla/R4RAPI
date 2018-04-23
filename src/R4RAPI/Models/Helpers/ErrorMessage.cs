@@ -17,6 +17,10 @@ namespace R4RAPI.Models
         /// <returns></returns>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:R4RAPI.Models.ErrorMessage"/>.
+        /// </summary>
+        /// <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:R4RAPI.Models.ErrorMessage"/>.</returns>
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
