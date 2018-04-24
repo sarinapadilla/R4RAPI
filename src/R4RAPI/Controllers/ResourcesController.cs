@@ -233,21 +233,19 @@ namespace R4RAPI.Controllers
 
             foreach (string facetToFetch in includeFacets)
             {
-                R4RAPIOptions.FacetConfig config = _apiOptions.AvailableFacets[facetToFetch];
-
-                var filters = ( !string.IsNullOrWhiteSpace(config.RequiresFilter) && resourceQuery.Filters.ContainsKey(config.RequiresFilter) ) ? resourceQuery.Filters[config.RequiresFilter] : new string[] { };
-
-                if(!string.IsNullOrWhiteSpace(config.RequiresFilter) && filters.Length == 0)
+                if(ShouldFetchFacet(facetToFetch, resourceQuery))
+                {
+                    KeyLabelAggResult[] aggResults = _aggService.GetKeyLabelAggregation(facetToFetch, resourceQuery);
+                    if (aggResults != null && aggResults.Length > 0)
+                    {
+                        facets.Add(
+                            TransformFacet(facetToFetch, resourceQuery, aggResults)
+                        );
+                    }
+                }
+                else
                 {
                     continue;
-                }
-
-                KeyLabelAggResult[] aggResults = _aggService.GetKeyLabelAggregation(facetToFetch, resourceQuery);
-                if (aggResults != null && aggResults.Length > 0)
-                {
-                    facets.Add(
-                        TransformFacet(facetToFetch, resourceQuery, aggResults)
-                    );
                 }
             }
 
@@ -292,6 +290,36 @@ namespace R4RAPI.Controllers
             return facet;
         }
 
+        /// <summary>
+        /// Determines whether a facet should be fetched
+        /// This returns false if a facet requires a different filter to be set, and that other filter isn't set
+        /// </summary>
+        /// <returns>A boolean, indicating whether to fetch the given facet</returns>
+        /// <param name="facetName">A list of facet names to include in our search</param>
+        /// <param name="resourceQuery">The resource query (used for determining currently-set filters)</param>
+        private bool ShouldFetchFacet(string facetName, ResourceQuery resourceQuery)
+        {
+            R4RAPIOptions.FacetConfig config = _apiOptions.AvailableFacets[facetName];
+
+            var filters = (!string.IsNullOrWhiteSpace(config.RequiresFilter) && resourceQuery.Filters.ContainsKey(config.RequiresFilter)) ? resourceQuery.Filters[config.RequiresFilter] : new string[] { };
+
+            if (!string.IsNullOrWhiteSpace(config.RequiresFilter) && filters.Length == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+        }
+
+        /// <summary>
+        /// Checks if given filter is set in the query.
+        /// </summary>
+        /// <returns>A bool, indicating whether the filter is set</returns>
+        /// <param name="filterName">The filter name to check</param>
+        /// <param name="resourceQuery">The resource query</param>
         private bool IsFilterSet(string filterName, ResourceQuery resourceQuery)
         {
             return resourceQuery.Filters.ContainsKey(filterName) && resourceQuery.Filters[filterName].Length > 0;
