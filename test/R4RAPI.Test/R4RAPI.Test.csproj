@@ -31,12 +31,16 @@
   <ItemGroup>
     <None Remove="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json" />
     <None Remove="TestData\ESResAggSvcData\SubtoolTypes_WithToolType.json" />
+    <None Remove="TestData\ESResAggSvcData\SubtoolTypes_WithToolType_NoResults.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\ESResAggSvcData\SubtoolTypes_WithToolType.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\ESResAggSvcData\SubtoolTypes_WithToolType_NoResults.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

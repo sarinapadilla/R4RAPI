@@ -247,7 +247,7 @@ namespace R4RAPI.Test.Services
         /// THIS TEST IS FOR MAKING SURE THE RESULTS ARE MAPPED CORRECTLY
         /// </summary>
         [Fact]
-        public void GetKeyLabelAggregation_EmptyQuery() {
+        public void GetKLA_Basic_NoQuery() {
             //Create new ESRegAggConnection...
 
             IConnection conn = new ESResAggSvcConnection("ResearchTypes_EmptyQuery");
@@ -291,7 +291,7 @@ namespace R4RAPI.Test.Services
 
 
         [Fact]
-        public void GetKLA_SubType()
+        public void GetKLA_SubType_NoQuery()
         {
             //Create new ESRegAggConnection...
 
@@ -346,6 +346,33 @@ namespace R4RAPI.Test.Services
             Assert.Equal(expectedAggs, actualAggs, new KeyLabelAggResultComparer());
 
         }
+
+        [Fact]
+        public void GetKLA_SubType_NoMatches()
+        {
+            //Create new ESRegAggConnection...
+
+            IConnection conn = new ESResAggSvcConnection("SubtoolTypes_WithToolType_NoResults");
+
+            //Expected Aggs
+            KeyLabelAggResult[] expectedAggs = new KeyLabelAggResult[] { };
+
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+            KeyLabelAggResult[] actualAggs = aggSvc.GetKeyLabelAggregation(
+                "toolSubtypes",
+                new ResourceQuery
+                {
+                    Filters = new Dictionary<string, string[]> {
+                                    { "toolTypes", new string[] { "nohits" } }
+                    }
+                }
+            );
+
+            //Order does matter here, so we can compare the arrays
+            Assert.Equal(expectedAggs, actualAggs, new KeyLabelAggResultComparer());
+
+        }
+
         #endregion
 
 
