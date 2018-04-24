@@ -7,6 +7,9 @@ using Nest;
 
 using Moq;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using Xunit;
+using Newtonsoft.Json;
 
 namespace NCI.OCPL.Utils.Testing
 {
@@ -101,6 +104,25 @@ namespace NCI.OCPL.Utils.Testing
             return elasticClientMock.Object;
         }
 
+        /// <summary>
+        /// Asserts that a Query Container matches the JSON represented as expectedStr.
+        /// </summary>
+        /// <param name="expectedStr">The JSON representing the expected query</param>
+        /// <param name="query">The query object</param>
+        public static void AssertQueryJson(string expectedStr, QueryContainer query)
+        {
+
+            var pool = new SingleNodeConnectionPool(new Uri("http://localhost:9200"));
+            var connectionSettings = new ConnectionSettings(pool, new ElasticsearchInterceptingConnection());
+
+            JObject expected = JObject.Parse(expectedStr);
+            JObject actual = JObject.Parse(JsonConvert.SerializeObject(query, new JsonSerializerSettings
+            {
+                ContractResolver = new ElasticContractResolver(connectionSettings, new List<Func<Type, JsonConverter>>())
+            }));
+
+            Assert.Equal(expected, actual);
+        }
 
         /// <summary>
         /// Comparer for comparing SearchTemplate Requests

@@ -44,16 +44,95 @@ namespace R4RAPI.Services
         }
 
         /// <summary>
+        /// Gets the complete query with the keyword part and the filters part.
+        /// </summary>
+        /// <remarks>This is used by both the Query and Aggregation services.</remarks>
+        /// <returns>A QueryContainer representing the entire query.  </returns>
+        /// <param name="keyword">Keyword for the search</param>
+        /// <param name="filtersList">The complete filters list</param>
+        protected QueryContainer GetFullQuery(string keyword, Dictionary<string, string[]> filtersList) {
+            QueryContainer query = null;
+
+            QueryContainer keywordQuery = GetKeywordQuery(keyword);
+            IEnumerable<QueryContainer> filtersQueries = GetAllFiltersForQuery(filtersList);
+
+            if (keywordQuery != null && filtersQueries.Count() > 0) {
+                query = new BoolQuery
+                {
+                    Filter = filtersQueries,
+                    Must = new QueryContainer[] { keywordQuery }
+                };
+            } else if (keywordQuery != null) {
+                query = keywordQuery;
+            } else if (filtersQueries.Count() > 0) {
+                query = new BoolQuery
+                {
+                    Filter = filtersQueries
+                };
+            } //Else there is no query.
+
+            return query;
+        }
+
+        /// <summary>
+        /// Gets the keyword part of the query.
+        /// </summary>
+        /// <returns>The keyword query.</returns>
+        /// <param name="keyword">Keyword.</param>
+        protected QueryContainer GetKeywordQuery(string keyword) {
+            QueryContainer query = null;
+            if (!string.IsNullOrEmpty(keyword)) {
+                //Make this a bool query
+                query = null;
+            }
+            return query;
+        }
+
+        /// <summary>
+        /// Gets a query object to be used for all filters. 
+        /// </summary>
+        /// <remarks>
+        /// When more than one filter is used we must use a Bool query (Must) to wrap the
+        /// TermQuery objects that represent the filters. When only one filter is used, 
+        /// then we only need to return a single TermQuery.
+        /// </remarks>
+        /// <returns>All of the filters for this query.  This is something that can be used for the filter
+        /// portion of a bool query.</returns>
+        /// <param name="filtersList">A dictionary containing of all of the filters. 
+        /// The key should be the name of the field to filter.
+        /// The values are a list of all of the filters.
+        /// </param>
+        protected IEnumerable<QueryContainer> GetAllFiltersForQuery(Dictionary<string,string[]> filtersList) {
+
+            //NOTE: This assumes there are not dependencies between fields. (e.g. toolType & toolSubtype)
+            //Therefore we are not required to do any complicated nested queries. This will work if all
+            //the keys of the filters are unique. 
+            //e.g. toolType: foo|toolSubtype: bar && toolType: bazz| toolSubtype: bar would not work.
+            IEnumerable<QueryContainer> queries = new QueryContainer[]{};
+
+            if (filtersList.Count == 1) {
+                KeyValuePair<string, string[]> filter = filtersList.First();
+                queries = new QueryContainer[] { GetQueryForFilterField(filter.Key, filter.Value) };
+            } else if (filtersList.Count > 1) {
+                queries = from filter in filtersList
+                            select GetQueryForFilterField(filter.Key, filter.Value);
+            }
+
+            return queries;
+        }
+
+        /// <summary>
         /// Gets a query object used for filtering a field given one or more filters
         /// </summary>
         /// <remarks>
-        /// When more than one filter is used we must use a Bool query to wrap the
+        /// When more than one filter is used we must use a Bool query (Should) to wrap the
         /// TermQuery objects that represent the filters. When only one filter is used, 
         /// then we only need to return a single TermQuery.
         /// </remarks>
         /// <returns>The QueryContainer to be used by the filter.</returns>
         /// <param name="field">The field to filter on.</param>
         /// <param name="filters">The filters to turn into the query</param>
+        /// <exception cref="ArgumentNullException">If there are 0 items in the filters list</exception>
         protected QueryContainer GetQueryForFilterField(string field, string[] filters) {
             QueryContainer query = null;
 
@@ -85,15 +164,12 @@ namespace R4RAPI.Services
         /// <returns>The query for field.</returns>
         /// <param name="field">Field.</param>
         /// <param name="value">Value.</param>
-        protected TermQuery GetQueryForField(string field, string value, double boost = 0)
+        protected TermQuery GetQueryForField(string field, string value)
         {            
             TermQuery query = new TermQuery {
                 Field = field,
                 Value = value
             };
-
-            if (boost > 0)
-                query.Boost = boost;
 
             return query;
         }

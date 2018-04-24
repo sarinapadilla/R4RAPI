@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace R4RAPI.Test.Services
 {
-    public class ESResourceAggregationServiceTests : TestESResourceServiceBase
+    public class ESResourceAggregationService_Tests : TestESResourceServiceBase
     {
 
         #region Test Query Building
@@ -370,7 +370,6 @@ namespace R4RAPI.Test.Services
 
             //Order does matter here, so we can compare the arrays
             Assert.Equal(expectedAggs, actualAggs, new KeyLabelAggResultComparer());
-
         }
 
         #endregion
