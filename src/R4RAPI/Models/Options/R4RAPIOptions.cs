@@ -10,7 +10,6 @@ namespace R4RAPI.Models
     /// </summary>
     public class R4RAPIOptions
     {
-
         /// <summary>
         /// Gets or sets the alias name for the Elasticsearch Collection we will use
         /// </summary>
@@ -50,7 +49,6 @@ namespace R4RAPI.Models
         /// </summary>
         public class FacetConfig
         {
-
             /// <summary>
             /// Gets or sets the name of the filter parameter to be used to filter
             /// this facet.
@@ -87,6 +85,5 @@ namespace R4RAPI.Models
         }
 
         #endregion
-
     }
 }

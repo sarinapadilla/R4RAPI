@@ -21,19 +21,9 @@ namespace R4RAPI.Controllers
     [Route("resources")]
     public class ResourcesController : Controller
     {
-        //private static readonly string _file = "R4RData.txt";
-
-        /// <summary>
-        /// THIS SHOULD BE REMOVED IN LIEU OF THE CONFIG
-        /// </summary>
-        public static readonly string[] DefaultFacets = {
-            // These R4R facets appear in results:
-            ""
-            // These R4R facets DO NOT appear in results:
-        };
-
         private IHostingEnvironment _environment;
         private readonly ILogger _logger;
+        private readonly R4RAPIOptions _apiOptions;
         private readonly IResourceQueryService _queryService;
         private readonly IResourceAggregationService _aggService;
         private readonly IUrlHelper _urlHelper;
@@ -47,13 +37,15 @@ namespace R4RAPI.Controllers
         /// <param name="aggService">Agg service.</param>
         public ResourcesController(
             IHostingEnvironment environment, 
-            ILogger<ResourcesController> logger, 
+            ILogger<ResourcesController> logger,
+            IOptions<R4RAPIOptions> apiOptionsAccessor,
             IResourceQueryService queryService, 
             IResourceAggregationService aggService,
             IUrlHelper urlHelper)
         {
             _environment = environment;
             _logger = logger;
+            _apiOptions = apiOptionsAccessor.Value;
             _queryService = queryService;
             _aggService = aggService;
             _urlHelper = urlHelper;
@@ -87,142 +79,111 @@ namespace R4RAPI.Controllers
             [FromQuery] int from = 0
         )
         {
-            // Set default values for params
-            if (IsNullOrEmpty(includeFields))
-            {
-                includeFields = new string[] { };
-            }
+            // TODO: Validate query params here - need more validation!
 
-            if (IsNullOrEmpty(includeFacets))
-            {
-                includeFacets = DefaultFacets;
-            }
-
-            // TODO: Validate query params here
             // 1. Cause error if subToolType exists, but no toolType
             if (IsNullOrEmpty(toolTypes) && !IsNullOrEmpty(subTypes))
             {
                 _logger.LogError("Cannot have subtype without tooltype.", subTypes);
+                throw new ArgumentException("Cannot have subtype without tooltype.");
             }
+
             // 2. Cause error if multiple toolTypes exist
             if (toolTypes != null && toolTypes.Length > 1)
             {
-                _logger.LogError("Cannot have multiple tooltype.", toolTypes);
+                _logger.LogError("Cannot have multiple tooltypes.", toolTypes);
+                throw new ArgumentException("Cannot have multiple tooltypes.");
             }
 
             // Build resource query object using params
             ResourceQuery resourceQuery = new ResourceQuery();
 
+            // Add keyword, if included in params
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 resourceQuery.Keyword = keyword;
             }
 
+            // Add tool types, if included in params
             if (!IsNullOrEmpty(toolTypes))
             {
                 resourceQuery.Filters.Add("toolTypes", toolTypes);
             }
 
+            // Add tool subtypes, if included in params
             if (!IsNullOrEmpty(subTypes))
             {
                 resourceQuery.Filters.Add("toolSubtypes", subTypes);
             }
 
+            // Add research areas, if included in params
             if (!IsNullOrEmpty(researchAreas))
             {
                 resourceQuery.Filters.Add("researchAreas", researchAreas);
             }
 
-            if (!IsNullOrEmpty(docs))
-            {
-                resourceQuery.Filters.Add("docs", docs);
-            }
-
+            // Add research types, if included in params
             if (!IsNullOrEmpty(researchTypes))
             {
                 resourceQuery.Filters.Add("researchTypes", researchTypes);
             }
 
-            if (!IsNullOrEmpty(includeFields))
+            // Add docs, if included in params
+            if (!IsNullOrEmpty(docs))
             {
-                resourceQuery.Filters.Add("include", includeFields);
+                resourceQuery.Filters.Add("docs", docs);
             }
 
-            if (!IsNullOrEmpty(includeFacets))
+            // Set default values for params
+            if (IsNullOrEmpty(includeFacets))
             {
-                resourceQuery.Filters.Add("includeFacets", includeFacets);
+                includeFacets = GetDefaultIncludeFacets();
+            }
+            else if (!ValidateFacetList(includeFacets))
+            {
+                //TODO: Actually list the invalid facets
+                _logger.LogError("Included facets in query are not valid.");
+                throw new ArgumentException("Included facets in query are not valid.");
+            }
+
+            if (IsNullOrEmpty(includeFields))
+            {
+                includeFields = new string[] { };
             }
 
             // Perform query for resources (using params if they're given)
             ResourceQueryResult queryResults = _queryService.QueryResources(resourceQuery, size, from, includeFields);
 
-            // Perform query for Research Areas and Research Types aggregations
-            KeyLabelAggResult[] raAggResults = _aggService.GetKeyLabelAggregation("researchAreas", resourceQuery);
-            KeyLabelAggResult[] rtAggResults = _aggService.GetKeyLabelAggregation("researchTypes", resourceQuery);
-            KeyLabelAggResult[] ttAggResults = _aggService.GetKeyLabelAggregation("toolTypes", resourceQuery);
-
             // Convert query results into ResourceResults
             ResourceResults results = new ResourceResults();
             if(queryResults != null)
             {
-                PageMetaData meta = new PageMetaData();
-                meta.TotalResults = queryResults.TotalResults;
-                meta.OriginalQuery = _urlHelper.RouteUrl(new {
-                    size,
-                    from,
-                    q = keyword,
-                    toolTypes,
-                    toolSubtypes = subTypes,
-                    researchAreas,
-                    researchTypes,
-                    docs,
-                    include = includeFields,
-                    includeFacets
-                });
+                PageMetaData meta = new PageMetaData
+                {
+                    TotalResults = queryResults.TotalResults,
+                    OriginalQuery = _urlHelper.RouteUrl(new
+                    {
+                        size,
+                        from,
+                        q = keyword,
+                        toolTypes,
+                        toolSubtypes = subTypes,
+                        researchAreas,
+                        researchTypes,
+                        docs,
+                        include = includeFields,
+                        includeFacets
+                    })
+                };
                 results.Meta = meta;
                 results.Results = queryResults.Results;
             }
 
-            // Convert aggregations into facet items/facets
-            List<Facet> facets = new List<Facet>();
-            if (raAggResults != null)
-            {
-                Facet raFacet = new Facet();
-                raFacet.Param = "researchAreas";
-                raFacet.Title = "Research Areas";
-
-                var raFacetItems = raAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
-                raFacet.Items = raFacetItems.ToArray();
-
-                facets.Add(raFacet);
-            }
-            
-            if(rtAggResults != null)
-            {
-                Facet rtFacet = new Facet();
-                rtFacet.Param = "researchTypes";
-                rtFacet.Title = "Research Types";
-
-                var rtFacetItems = rtAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
-                rtFacet.Items = rtFacetItems.ToArray();
-
-                facets.Add(rtFacet);
-            }
-
-            if (ttAggResults != null)
-            {
-                Facet ttFacet = new Facet();
-                ttFacet.Param = "toolTypes";
-                ttFacet.Title = "Tool Types";
-
-                var ttFacetItems = ttAggResults.Select(i => new FacetItem { Key = i.Key, Label = i.Label, Count = Convert.ToInt32(i.Count) });
-                ttFacet.Items = ttFacetItems.ToArray();
-
-                facets.Add(ttFacet);
-            }
+            // Perform query for facet aggregations (using includeFacets param if it's given, otherwise default facets to include from options)
+            Facet[] facets = GetFacets(includeFacets, resourceQuery);
 
             // Add facets to ResourceResults
-            results.Facets = facets.ToArray<Facet>();
+            results.Facets = facets;
 
             return results;
         }
@@ -230,6 +191,111 @@ namespace R4RAPI.Controllers
         static bool IsNullOrEmpty(string[] myStringArray)
         {
             return myStringArray == null || myStringArray.Length < 1;
+        }
+
+        /// <summary>
+        /// Gets the default facets from the config
+        /// </summary>
+        /// <returns>A list of default facet names</returns>
+        private string[] GetDefaultIncludeFacets()
+        {
+            // TODO: Remove RequiresFilter constraint once correct logic is implemented
+            return _apiOptions.AvailableFacets.Where(f => f.Value.IncludeInDefault).Select(f => f.Key).ToArray();
+        }
+
+        /// <summary>
+        /// Validates the given list of facets using available facets from the config
+        /// </summary>
+        /// <returns>A boolean indicating whether the list of facets is valid</returns>
+        /// <param name="includeFacets">A list of facet names</param>
+        private bool ValidateFacetList(string[] includeFacets)
+        {
+            foreach (var filterName in includeFacets)
+            {
+                if (!_apiOptions.AvailableFacets.Keys.Contains(filterName))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Searches for all included facets
+        /// </summary>
+        /// <returns>An array of facets</returns>
+        /// <param name="includeFacets">A list of facet names to include in our search</param>
+        /// <param name="resourceQuery">The resource query (used for determining facet items)</param>
+        private Facet[] GetFacets(string[] includeFacets, ResourceQuery resourceQuery)
+        {
+            List<Facet> facets = new List<Facet>();
+
+            foreach (string facetToFetch in includeFacets)
+            {
+                R4RAPIOptions.FacetConfig config = _apiOptions.AvailableFacets[facetToFetch];
+
+                var filters = ( !string.IsNullOrWhiteSpace(config.RequiresFilter) && resourceQuery.Filters.ContainsKey(config.RequiresFilter) ) ? resourceQuery.Filters[config.RequiresFilter] : new string[] { };
+
+                if(!string.IsNullOrWhiteSpace(config.RequiresFilter) && filters.Length == 0)
+                {
+                    continue;
+                }
+
+                KeyLabelAggResult[] aggResults = _aggService.GetKeyLabelAggregation(facetToFetch, resourceQuery);
+                if (aggResults != null && aggResults.Length > 0)
+                {
+                    facets.Add(
+                        TransformFacet(facetToFetch, resourceQuery, aggResults)
+                    );
+                }
+            }
+
+            return facets.ToArray();
+        }
+
+        /// <summary>
+        /// Transforms the string name and returned aggregate results into a Facet
+        /// </summary>
+        /// <returns>An facet</returns>
+        /// <param name="facetToFetch">The name of the facet to fetch</param>
+        /// <param name="aggResults">The list of aggregate results to transform to facet items</param>
+        private Facet TransformFacet(string facetToFetch, ResourceQuery resourceQuery, KeyLabelAggResult[] aggResults)
+        {
+            R4RAPIOptions.FacetConfig config = _apiOptions.AvailableFacets[facetToFetch];
+
+            IEnumerable<string> filters = new string[] { };
+            if(resourceQuery.Filters.ContainsKey(config.FilterName))
+            {
+                filters = resourceQuery.Filters[config.FilterName];
+            }
+
+            Facet facet = new Facet
+            {
+                Param = config.FilterName,
+                Title = config.Label,
+                Items = aggResults.Select(fi =>
+                    new FacetItem
+                    {
+                        Key = fi.Key,
+                        Label = fi.Label,
+                        Count = Convert.ToInt32(fi.Count),
+                        Selected = filters.Contains(fi.Key)
+                    }).ToArray()
+            };
+
+            if (config.FacetType == R4RAPIOptions.FacetTypes.Single && IsFilterSet(config.FilterName, resourceQuery))
+            {
+                facet.Items = facet.Items.Where(i => i.Selected).ToArray();
+            }
+
+            return facet;
+        }
+
+        private bool IsFilterSet(string filterName, ResourceQuery resourceQuery)
+        {
+            return resourceQuery.Filters.ContainsKey(filterName) && resourceQuery.Filters[filterName].Length > 0;
+
         }
     }
 }
