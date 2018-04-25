@@ -35,29 +35,15 @@ namespace R4RAPI.Test.Services
             JObject actualRequest = null;
             JObject expectedRequest = JObject.Parse(@"
                 {
-                    ""size"": 0,
-                    ""aggs"": {
-                        ""researchTypes_agg"": {
-                            ""nested"": {
-                                ""path"": ""researchTypes""
-                            },
-                            ""aggs"": {
-                                ""researchTypes_key"": {
-                                    ""terms"": {
-                                        ""field"": ""researchTypes.key"",
-                                        ""size"": 999
-                                    },
-                                    ""aggs"": {
-                                        ""researchTypes_label"": {
-                                            ""terms"": {
-                                                ""field"": ""researchTypes.label""
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                  ""from"": 0,
+                  ""size"": 20,
+                  ""query"": {
+                    ""bool"": {
+                        ""filter"": [
+                            {""term"": { ""researchTypes.key"": { ""value"": ""basic"" }}}
+                        ]
                     }
+                  }
                 } 
             ");
             /*
