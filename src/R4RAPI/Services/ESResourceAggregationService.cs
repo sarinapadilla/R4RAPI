@@ -69,6 +69,11 @@ namespace R4RAPI.Services
                 Aggregations = GetAggQuery(facetConfig, query)
             };
 
+            var searchQuery = GetSearchQueryForFacet(facetConfig.FilterName, query);
+            if (searchQuery != null) {
+                req.Query = searchQuery;
+            }
+
             try
             {
                 //We must(?) pass the C# type to map the results to
@@ -81,6 +86,29 @@ namespace R4RAPI.Services
                 this._logger.LogError($"Could not fetch aggregates for field: {field}");
                 throw new Exception($"Could not fetch aggregates for field: {field}", ex);
             }
+        }
+
+        /// <summary>
+        /// Gets a search query (the Query portion of a SearchRequest) with the
+        /// requested facet's filter removed.
+        /// </summary>
+        /// <returns>The search query for facet.</returns>
+        /// <param name="field">The facet filter being requested.</param>
+        /// <param name="resourceQuery">Resource query.</param>
+        private QueryContainer GetSearchQueryForFacet(string field, ResourceQuery resourceQuery) 
+        {
+            QueryContainer query = null;
+
+            var filteredFilters = from filter in resourceQuery.Filters
+                                  where filter.Key != field
+                                  select filter;
+
+            query = this.GetFullQuery(
+                resourceQuery.Keyword,
+                new Dictionary<string, string[]>(filteredFilters)
+            );
+
+            return query;
         }
 
         /// <summary>

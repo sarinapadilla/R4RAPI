@@ -37,6 +37,13 @@ namespace R4RAPI.Test.Services
             JObject expectedRequest = JObject.Parse(@"
                 {
                     ""size"": 0,
+                    ""query"": {
+                        ""bool"": {
+                            ""filter"": [
+                                { ""term"": { ""toolTypes"": { ""value"": ""datasets_databases"" }}}
+                            ]
+                        }
+                    },
                     ""aggs"": {
                         ""toolSubtypes_agg"": {
                             ""nested"": {
@@ -112,6 +119,20 @@ namespace R4RAPI.Test.Services
             JObject expectedRequest = JObject.Parse(@"
                 {
                     ""size"": 0,
+                    ""query"": {
+                        ""bool"": {
+                            ""filter"": [
+                                {
+                                ""bool"": {
+                                ""should"": [
+                                  { ""term"": { ""toolTypes"": { ""value"": ""datasets_databases"" }}},
+                                  { ""term"": { ""toolTypes"": { ""value"": ""anothertype"" }}}
+                                ], ""minimum_should_match"": 1
+                                }
+                                }
+                            ]
+                        }
+                    },
                     ""aggs"": {
                         ""toolSubtypes_agg"": {
                             ""nested"": {
@@ -182,6 +203,70 @@ namespace R4RAPI.Test.Services
             Assert.Equal(expectedPath, actualPath);
             Assert.Equal(expectedRequest, actualRequest);
         }
+
+        [Fact]
+        public void GetKeyLabelAggregation_Build_FilterRequestFacet()
+        {
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                    ""size"": 0,
+                    ""aggs"": {
+                        ""researchTypes_agg"": {
+                            ""nested"": {
+                                ""path"": ""researchTypes""
+                            },
+                            ""aggs"": {
+                                ""researchTypes_key"": {
+                                    ""terms"": {
+                                        ""field"": ""researchTypes.key"",
+                                        ""size"": 999
+                                    },
+                                    ""aggs"": {
+                                        ""researchTypes_label"": {
+                                            ""terms"": {
+                                                ""field"": ""researchTypes.label""
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } 
+            ");
+            /*
+            */
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+            try
+            {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation("researchTypes", new ResourceQuery(){
+                    Filters = new Dictionary<string, string[]>{
+                        { "researchTypes", new string[] { "basic"}}
+                    }
+                });
+            }
+            catch (Exception) { } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest);
+        }
+
 
         [Fact]
         public void GetKeyLabelAggregation_Build_EmptyQuery() {
