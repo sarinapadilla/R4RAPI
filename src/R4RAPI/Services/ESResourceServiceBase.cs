@@ -82,8 +82,10 @@ namespace R4RAPI.Services
         protected QueryContainer GetKeywordQuery(string keyword) {
             QueryContainer query = null;
             if (!string.IsNullOrEmpty(keyword)) {
-                //Make this a bool query
-                query = null;
+                query = new BoolQuery
+                {
+                    Should = GetFullTextQuery(GetTextQueryDefinition(), keyword)
+                };
             }
             return query;
         }
@@ -175,11 +177,11 @@ namespace R4RAPI.Services
             return query;
         }
 
-        protected Object[] GetTextQueryDefinition()
+        protected FullTextField[] GetTextQueryDefinition()
         {
-            var fields = new Object[]
+            var fields = new FullTextField[]
             {
-                new
+                new FullTextField
                 {
                     FieldName = "body._fulltext",
                     Boost = 1,
@@ -190,15 +192,62 @@ namespace R4RAPI.Services
             return fields;
         }
 
-        protected QueryContainer[] BuildFullTextQuery(Object[] fields)
+        /// <summary>
+        /// Gets a list of QueryContainers for all fulltext fields.
+        /// </summary>
+        /// <returns>The QueryContainers for all fulltext fields.</returns>
+        /// <param name="fields">Full-text fields.</param>
+        /// <param name="query">Query text.</param>
+        protected IEnumerable<QueryContainer> GetFullTextQuery(FullTextField[] fields, string query)
         {
+            List<QueryContainer> fullTextQuery = new List<QueryContainer>();
+
+            if(fields.Length > 0)
+            {
+                foreach(FullTextField field in fields)
+                {
+                    fullTextQuery.AddRange(GetQueryForFullTextField(field.FieldName, query, field.Boost, field.MatchTypes));
+                }
+            }
+            else
+            {
+                throw new Exception("There must be more than one full text field for query.");
+            }
+
+
             return null;
         }
 
+        
         /// <summary>
         /// Gets a QueryContainer for a given fulltext field.
         /// </summary>
-        /// <returns>The query for fulltext field.</returns>
+        /// <returns>The query for the fulltext field.</returns>
+        /// <param name="field">Field.</param>
+        /// <param name="query">Query text.</param>
+        /// <param name="boost">Boost.</param>
+        /// <param name="matchTypes">Match types.</param>
+        protected IEnumerable<QueryContainer> GetQueryForFullTextField(string field, string query, int boost, string[] matchTypes)
+        {
+            IEnumerable<QueryContainer> fullTextFieldQuery = new QueryContainer[] { };
+
+            if (matchTypes.Length > 0)
+            {
+                fullTextFieldQuery = from matchType in matchTypes
+                                     select GetQueryForMatchType(field, query, boost, matchType);
+            }
+            else
+            {
+                throw new ArgumentException($"Field {field} must have at least one match type.");
+            }
+
+            return fullTextFieldQuery;
+        }
+
+        /// <summary>
+        /// Gets a QueryContainer for a given fulltext field's match type.
+        /// </summary>
+        /// <returns>The query for the specific match type of the fulltext field.</returns>
         /// <param name="field">Field.</param>
         /// <param name="query">Query text.</param>
         /// <param name="boost">Boost.</param>
@@ -207,6 +256,14 @@ namespace R4RAPI.Services
         {
             switch(matchType)
             {
+                case "common":
+                    return new CommonTermsQuery
+                    {
+                        Field = field,
+                        Query = query,
+                        Boost = boost,
+                        LowFrequencyOperator = Operator.And
+                    };
                 case "match":
                     return new MatchQuery
                     {
@@ -221,16 +278,8 @@ namespace R4RAPI.Services
                         Query = query,
                         Boost = boost
                     };
-                case "common":
-                    return new CommonTermsQuery
-                    {
-                        Field = field,
-                        Query = query,
-                        Boost = boost,
-                        LowFrequencyOperator = Operator.And
-                    };
                 default:
-                    return null;
+                    throw new ArgumentException($"Given match type {matchType} is for field {field} is invalid: must be common, match, or match_phrase.");
             }
         }
     }
