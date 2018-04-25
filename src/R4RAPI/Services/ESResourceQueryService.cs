@@ -108,7 +108,16 @@ namespace R4RAPI.Services
             {
                 Size = size,
                 From = from, 
+                //TODO:
+                //  Add Sort = ["_score","id"]
+                //  Source = includeFields
             };
+
+            //Add in the query
+            var searchQuery = this.GetFullQuery(query.Keyword, query.Filters);
+            if (searchQuery != null) {
+                request.Query = searchQuery;
+            }
 
             try
             {
