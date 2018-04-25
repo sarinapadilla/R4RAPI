@@ -257,6 +257,7 @@ namespace R4RAPI.Controllers
         /// </summary>
         /// <returns>An facet</returns>
         /// <param name="facetToFetch">The name of the facet to fetch</param>
+        /// <param name="resourceQuery">The resource query (used for determining currently-set filters)</param>
         /// <param name="aggResults">The list of aggregate results to transform to facet items</param>
         private Facet TransformFacet(string facetToFetch, ResourceQuery resourceQuery, KeyLabelAggResult[] aggResults)
         {
