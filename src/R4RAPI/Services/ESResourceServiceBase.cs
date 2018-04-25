@@ -112,10 +112,10 @@ namespace R4RAPI.Services
 
             if (filtersList.Count == 1) {
                 KeyValuePair<string, string[]> filter = filtersList.First();
-                queries = new QueryContainer[] { GetQueryForFilterField(filter.Key, filter.Value) };
+                queries = new QueryContainer[] { GetQueryForFilterField($"{filter.Key}.key", filter.Value) };
             } else if (filtersList.Count > 1) {
                 queries = from filter in filtersList
-                            select GetQueryForFilterField(filter.Key, filter.Value);
+                          select GetQueryForFilterField($"{filter.Key}.key", filter.Value);
             }
 
             return queries;
@@ -135,7 +135,6 @@ namespace R4RAPI.Services
         /// <exception cref="ArgumentNullException">If there are 0 items in the filters list</exception>
         protected QueryContainer GetQueryForFilterField(string field, string[] filters) {
             QueryContainer query = null;
-            string fieldKey = $"{field}.key";
 
             if (filters.Length == 0)
             {
@@ -145,13 +144,13 @@ namespace R4RAPI.Services
             if (filters.Length == 1)
             {
                 //There is only one, so it can just be a term query.
-                query = GetQueryForField(fieldKey, filters[0]);
+                query = GetQueryForField(field, filters[0]);
             }
             else
             {
                 query = new BoolQuery { 
                     Should = from filter in filters
-                                select (QueryContainer)GetQueryForField(fieldKey, filter),
+                                select (QueryContainer)GetQueryForField(field, filter),
                     MinimumShouldMatch = 1
                 };
             }
