@@ -66,7 +66,7 @@ namespace R4RAPI.Controllers
         /// <param name="size">The number of resources to return</param>
         /// <param name="from">The offset of the resources to return</param>
         [HttpGet]
-        public ResourceResults GetAll(
+        public async Task<ResourceResults> GetAll(
             [FromQuery(Name = "q")] string keyword = null,
             [FromQuery(Name = "toolTypes")] string[] toolTypes = null,
             [FromQuery(Name = "toolSubtypes")] string[] subTypes = null,
@@ -151,37 +151,46 @@ namespace R4RAPI.Controllers
                 includeFields = new string[] { };
             }
 
-            // Perform query for resources (using params if they're given)
-            ResourceQueryResult queryResults = _queryService.QueryResources(resourceQuery, size, from, includeFields);
-
-            // Convert query results into ResourceResults
+            //Create the results object
             ResourceResults results = new ResourceResults();
-            if(queryResults != null)
-            {
-                PageMetaData meta = new PageMetaData
+
+            //Now call query results & get aggs at the same time.
+            await Task.WhenAll(
+                Task.Run(async () =>
                 {
-                    TotalResults = queryResults.TotalResults,
-                    OriginalQuery = _urlHelper.RouteUrl(new
+                    // Perform query for resources (using params if they're given)
+                    ResourceQueryResult queryResults = await _queryService.QueryResourcesAsync(resourceQuery, size, from, includeFields);
+
+                    // Convert query results into ResourceResults
+                    if (queryResults != null)
                     {
-                        size,
-                        from,
-                        q = keyword,
-                        toolTypes,
-                        toolSubtypes = subTypes,
-                        researchAreas,
-                        researchTypes,
-                        docs,
-                        include = includeFields,
-                        includeFacets
-                    })
-                };
-                results.Meta = meta;
-                results.Results = queryResults.Results;
-            }
-
-            // Perform query for facet aggregations (using includeFacets param if it's given, otherwise default facets to include from options)
-            results.Facets = GetFacets(includeFacets, resourceQuery).Result; //Go back to sync now.
-
+                        PageMetaData meta = new PageMetaData
+                        {
+                            TotalResults = queryResults.TotalResults,
+                            OriginalQuery = _urlHelper.RouteUrl(new
+                            {
+                                size,
+                                from,
+                                q = keyword,
+                                toolTypes,
+                                toolSubtypes = subTypes,
+                                researchAreas,
+                                researchTypes,
+                                docs,
+                                include = includeFields,
+                                includeFacets
+                            })
+                        };
+                        results.Meta = meta;
+                        results.Results = queryResults.Results;
+                    }
+                }),
+                Task.Run(async () =>
+                {
+                    // Perform query for facet aggregations (using includeFacets param if it's given, otherwise default facets to include from options)
+                    results.Facets = await GetFacets(includeFacets, resourceQuery); //Go back to sync now.
+                })
+            );
 
 
             return results;
