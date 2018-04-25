@@ -180,10 +180,9 @@ namespace R4RAPI.Controllers
             }
 
             // Perform query for facet aggregations (using includeFacets param if it's given, otherwise default facets to include from options)
-            Facet[] facets = GetFacets(includeFacets, resourceQuery);
+            results.Facets = GetFacets(includeFacets, resourceQuery).Result; //Go back to sync now.
 
-            // Add facets to ResourceResults
-            results.Facets = facets;
+
 
             return results;
         }
@@ -227,29 +226,39 @@ namespace R4RAPI.Controllers
         /// <returns>An array of facets</returns>
         /// <param name="includeFacets">A list of facet names to include in our search</param>
         /// <param name="resourceQuery">The resource query (used for determining facet items)</param>
-        private Facet[] GetFacets(string[] includeFacets, ResourceQuery resourceQuery)
+        private async Task<Facet[]> GetFacets(string[] includeFacets, ResourceQuery resourceQuery)
         {
             List<Facet> facets = new List<Facet>();
 
-            foreach (string facetToFetch in includeFacets)
-            {
-                if(ShouldFetchFacet(facetToFetch, resourceQuery))
-                {
-                    KeyLabelAggResult[] aggResults = _aggService.GetKeyLabelAggregation(facetToFetch, resourceQuery);
-                    if (aggResults != null && aggResults.Length > 0)
-                    {
-                        facets.Add(
-                            TransformFacet(facetToFetch, resourceQuery, aggResults)
-                        );
-                    }
-                }
-                else
-                {
-                    continue;
-                }
-            }
+            //Get list of Tasks to await
+            //Use an array based on recommendations from Concurrency in C# Cookbook
+            //regarding possible issues with LINQ and async.
+            var facetsToFetch = (from facet in includeFacets
+                                 where ShouldFetchFacet(facet, resourceQuery)
+                                 select FetchFacet(facet, resourceQuery)).ToArray();
 
-            return facets.ToArray();
+            var returnedFacets = await Task.WhenAll(facetsToFetch);
+            return returnedFacets.Where(f => f != null).ToArray();
+        }
+
+        /// <summary>
+        /// Fetches a single facet asynchronously
+        /// </summary>
+        /// <returns>The facet.</returns>
+        /// <param name="facetToFetch">Facet to fetch.</param>
+        /// <param name="resourceQuery">Resource query.</param>
+        private async Task<Facet> FetchFacet(string facetToFetch, ResourceQuery resourceQuery)
+        {
+
+            KeyLabelAggResult[] aggResults = await _aggService.GetKeyLabelAggregationAsync(facetToFetch, resourceQuery);
+            if (aggResults != null && aggResults.Length > 0)
+            {
+                return TransformFacet(facetToFetch, resourceQuery, aggResults);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

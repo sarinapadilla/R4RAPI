@@ -135,6 +135,7 @@ namespace R4RAPI.Services
         /// <exception cref="ArgumentNullException">If there are 0 items in the filters list</exception>
         protected QueryContainer GetQueryForFilterField(string field, string[] filters) {
             QueryContainer query = null;
+            string fieldKey = $"{field}.key";
 
             if (filters.Length == 0)
             {
@@ -144,13 +145,13 @@ namespace R4RAPI.Services
             if (filters.Length == 1)
             {
                 //There is only one, so it can just be a term query.
-                query = GetQueryForField(field, filters[0]);
+                query = GetQueryForField(fieldKey, filters[0]);
             }
             else
             {
                 query = new BoolQuery { 
                     Should = from filter in filters
-                                select (QueryContainer)GetQueryForField(field, filter),
+                                select (QueryContainer)GetQueryForField(fieldKey, filter),
                     MinimumShouldMatch = 1
                 };
             }

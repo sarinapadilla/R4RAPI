@@ -20,7 +20,7 @@ namespace R4RAPI.Services
         /// <param name="client">A configured Elasticsearch client</param>
         /// <param name="apiOptionsAccessor">An accessor for the API options</param>
         /// <param name="logger">A logger for logging.</param>
-        public ESResourceQueryService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceAggregationService> logger)
+        public ESResourceQueryService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceQueryService> logger)
             : base(client, apiOptionsAccessor, logger) { }
 
         /// <summary>

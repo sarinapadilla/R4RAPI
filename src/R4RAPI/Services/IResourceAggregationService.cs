@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using R4RAPI.Models;
 
 namespace R4RAPI.Services
@@ -7,7 +8,7 @@ namespace R4RAPI.Services
     /// Interface for any concrete implementation of Resource Aggregation Services
     /// </summary>
     public interface IResourceAggregationService
-    {
+    {        
         /// <summary>
         /// Gets the key label aggregation for a field
         /// </summary>
@@ -15,5 +16,13 @@ namespace R4RAPI.Services
         /// <param name="field">The field to aggregate</param>
         /// <param name="query">The query for the results</param>
         KeyLabelAggResult[] GetKeyLabelAggregation(string field, ResourceQuery query);
+
+        /// <summary>
+        /// Asynchronously gets the key label aggregation for a field
+        /// </summary>
+        /// <param name="field">The field to aggregate</param>
+        /// <param name="query">The query for the results</param>
+        /// <returns>The aggregation items</returns>
+        Task<KeyLabelAggResult[]> GetKeyLabelAggregationAsync(string field, ResourceQuery query);
     }
 }
