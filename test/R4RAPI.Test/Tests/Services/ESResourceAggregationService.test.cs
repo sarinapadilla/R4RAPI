@@ -40,7 +40,7 @@ namespace R4RAPI.Test.Services
                     ""query"": {
                         ""bool"": {
                             ""filter"": [
-                                { ""term"": { ""toolTypes"": { ""value"": ""datasets_databases"" }}}
+                                { ""term"": { ""toolTypes.key"": { ""value"": ""datasets_databases"" }}}
                             ]
                         }
                     },
@@ -104,7 +104,7 @@ namespace R4RAPI.Test.Services
 
 
             Assert.Equal(expectedPath, actualPath);
-            Assert.Equal(expectedRequest, actualRequest);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
         }
 
         [Fact]
@@ -125,8 +125,8 @@ namespace R4RAPI.Test.Services
                                 {
                                 ""bool"": {
                                 ""should"": [
-                                  { ""term"": { ""toolTypes"": { ""value"": ""datasets_databases"" }}},
-                                  { ""term"": { ""toolTypes"": { ""value"": ""anothertype"" }}}
+                                  { ""term"": { ""toolTypes.key"": { ""value"": ""datasets_databases"" }}},
+                                  { ""term"": { ""toolTypes.key"": { ""value"": ""anothertype"" }}}
                                 ], ""minimum_should_match"": 1
                                 }
                                 }
@@ -201,7 +201,7 @@ namespace R4RAPI.Test.Services
 
 
             Assert.Equal(expectedPath, actualPath);
-            Assert.Equal(expectedRequest, actualRequest);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
         }
 
         [Fact]
@@ -264,7 +264,7 @@ namespace R4RAPI.Test.Services
 
 
             Assert.Equal(expectedPath, actualPath);
-            Assert.Equal(expectedRequest, actualRequest);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
         }
 
 
@@ -322,7 +322,7 @@ namespace R4RAPI.Test.Services
 
 
             Assert.Equal(expectedPath, actualPath);
-            Assert.Equal(expectedRequest, actualRequest);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
         }
         #endregion
 

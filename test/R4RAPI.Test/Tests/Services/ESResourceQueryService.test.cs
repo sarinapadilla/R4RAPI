@@ -73,7 +73,7 @@ namespace R4RAPI.Test.Services
 
 
             Assert.Equal(expectedPath, actualPath);
-            Assert.Equal(expectedRequest, actualRequest);            
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());            
         }
 
         #endregion
