@@ -42,9 +42,9 @@ namespace R4RAPI.Controllers
         /// <returns>The by identifier.</returns>
         /// <param name="id">Identifier.</param>
         [HttpGet("{id}")]
-        public Resource GetById(int id)
+        public async Task<Resource> GetById(int id)
         {
-            Resource result = _queryService.Get(id.ToString());
+            Resource result = await _queryService.GetAsync(id.ToString());
 
             if(result == null)
             {

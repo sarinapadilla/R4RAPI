@@ -24,11 +24,11 @@ namespace R4RAPI.Services
             : base(client, apiOptionsAccessor, logger) { }
 
         /// <summary>
-        /// Gets a resource from the API via its ID.
+        /// Asynchronously gets a resource from the API via its ID.
         /// </summary>
         /// <param name="id">The ID of the resource</param>
         /// <returns>The resource</returns>
-        public Resource Get(string id)
+        public async Task<Resource> GetAsync(string id)
         {
             Resource resResult = null;
 
@@ -42,12 +42,12 @@ namespace R4RAPI.Services
             int resID;
             bool validID = int.TryParse(id, out resID);
 
-            if(validID)
+            if (validID)
             {
                 try
                 {
                     // Fetch the resource with the given ID from the API.
-                    var response = _elasticClient.Get<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
+                    var response = await _elasticClient.GetAsync<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
 
                     // If the API's response isn't valid, throw an error and return 500 status code.
                     if (!response.IsValid)
@@ -68,7 +68,7 @@ namespace R4RAPI.Services
                         throw new APIErrorException(404, "Resource not found.");
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // Throw an exception if an error occurs.
                     _logger.LogError("Could not fetch resource ID " + resID);
@@ -85,14 +85,21 @@ namespace R4RAPI.Services
         }
 
         /// <summary>
-        /// Gets the resources that match the given params
+        /// Gets a resource from the API via its ID.
+        /// </summary>
+        /// <param name="id">The ID of the resource</param>
+        /// <returns>The resource</returns>
+        public Resource Get(string id) => GetAsync(id).Result;
+
+        /// <summary>
+        /// Asynchronously gets the resources that match the given params
         /// </summary>
         /// <param name="query">Query parameters (optional)</param>
         /// <param name="size">Number of results to return (optional)</param>
         /// <param name="from">Beginning index for results (optional)</param>
         /// <param name="includeFields">Fields to include (optional)</param>       
         /// <returns>Resource query result</returns>
-        public ResourceQueryResult QueryResources(
+        public async Task<ResourceQueryResult> QueryResourcesAsync(
             ResourceQuery query,
             int size = 20,
             int from = 0,
@@ -107,7 +114,7 @@ namespace R4RAPI.Services
             SearchRequest request = new SearchRequest(index, types)
             {
                 Size = size,
-                From = from, 
+                From = from,
                 //TODO:
                 //  Add Sort = ["_score","id"]
                 //  Source = includeFields
@@ -115,14 +122,15 @@ namespace R4RAPI.Services
 
             //Add in the query
             var searchQuery = this.GetFullQuery(query.Keyword, query.Filters);
-            if (searchQuery != null) {
+            if (searchQuery != null)
+            {
                 request.Query = searchQuery;
             }
 
             try
             {
                 // Fetch the resources that match the given query and parameters from the API.
-                var response = _elasticClient.Search<Resource>(request);
+                var response = await _elasticClient.SearchAsync<Resource>(request);
 
                 // If the API's response isn't valid, throw an error and return 500 status code.
                 if (!response.IsValid)
@@ -154,5 +162,21 @@ namespace R4RAPI.Services
 
             return queryResults;
         }
+
+        /// <summary>
+        /// Gets the resources that match the given params
+        /// </summary>
+        /// <param name="query">Query parameters (optional)</param>
+        /// <param name="size">Number of results to return (optional)</param>
+        /// <param name="from">Beginning index for results (optional)</param>
+        /// <param name="includeFields">Fields to include (optional)</param>       
+        /// <returns>Resource query result</returns>
+        public ResourceQueryResult QueryResources(
+            ResourceQuery query,
+            int size = 20,
+            int from = 0,
+            string[] includeFields = null
+        ) => QueryResourcesAsync(query, size, from, includeFields).Result;
+
     }
 }

@@ -20,6 +20,6 @@ namespace R4RAPI.Models
         /// The list of resources that matched the query
         /// </summary>
         /// <value>The results.</value>
-        public Resource[] Results { get; set; }
+        public Resource[] Results { get; set; } = new Resource[] { };
     }
 }
