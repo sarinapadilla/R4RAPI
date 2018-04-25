@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using R4RAPI.Models;
 using Nest;
+using System.Threading.Tasks;
 
 namespace R4RAPI.Services
 {
@@ -23,21 +24,22 @@ namespace R4RAPI.Services
         public ESResourceAggregationService(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger<ESResourceAggregationService> logger) 
             : base(client, apiOptionsAccessor, logger) {}
 
+
         /// <summary>
-        /// Gets the key label aggregation for a field
+        /// Asynchronously gets the key label aggregation for a field
         /// </summary>
         /// <param name="field">The field to aggregate</param>
         /// <param name="query">The query for the results</param>
         /// <returns>The aggregation items</returns>
-        public KeyLabelAggResult[] GetKeyLabelAggregation(string field, ResourceQuery query)
-        {
+        public async Task<KeyLabelAggResult[]> GetKeyLabelAggregationAsync(string field, ResourceQuery query) {
             if (string.IsNullOrWhiteSpace(field))
                 throw new ArgumentNullException(nameof(field));
 
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
 
-            if (!this._apiOptions.AvailableFacets.ContainsKey(field)) {
+            if (!this._apiOptions.AvailableFacets.ContainsKey(field))
+            {
                 throw new ArgumentException($"Field, {field}, does not have any configuration");
             }
 
@@ -53,11 +55,12 @@ namespace R4RAPI.Services
             if (
                 !string.IsNullOrWhiteSpace(facetConfig.RequiresFilter) &&
                 (!query.Filters.ContainsKey(facetConfig.RequiresFilter) || query.Filters[facetConfig.RequiresFilter].Length == 0)
-            ) {
+            )
+            {
                 throw new ArgumentException($"Facet, {facetConfig.FilterName}, requires filter, {facetConfig.RequiresFilter}");
             }
 
-            Indices index = Indices.Index(new string[] {this._apiOptions.AliasName});
+            Indices index = Indices.Index(new string[] { this._apiOptions.AliasName });
             Types types = Types.Type(new string[] { "resource" });
             SearchRequest req = new SearchRequest(index, types)
             {
@@ -70,7 +73,8 @@ namespace R4RAPI.Services
             };
 
             var searchQuery = GetSearchQueryForFacet(facetConfig.FilterName, query);
-            if (searchQuery != null) {
+            if (searchQuery != null)
+            {
                 req.Query = searchQuery;
             }
 
@@ -78,14 +82,26 @@ namespace R4RAPI.Services
             {
                 //We must(?) pass the C# type to map the results to
                 //even though our queries should not return anything.
-                var res = this._elasticClient.Search<Resource>(req);
-
+                var res = await this._elasticClient.SearchAsync<Resource>(req);
 
                 return ExtractAggResults(facetConfig, res).ToArray();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 this._logger.LogError($"Could not fetch aggregates for field: {field}");
                 throw new Exception($"Could not fetch aggregates for field: {field}", ex);
             }
+        }
+
+        /// <summary>
+        /// Gets the key label aggregation for a field
+        /// </summary>
+        /// <param name="field">The field to aggregate</param>
+        /// <param name="query">The query for the results</param>
+        /// <returns>The aggregation items</returns>
+        public KeyLabelAggResult[] GetKeyLabelAggregation(string field, ResourceQuery query)
+        {
+            return GetKeyLabelAggregationAsync(field, query).Result;
         }
 
         /// <summary>
