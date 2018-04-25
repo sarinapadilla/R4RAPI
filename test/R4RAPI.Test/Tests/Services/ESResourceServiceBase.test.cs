@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace R4RAPI.Test.Services
 {
@@ -38,6 +39,132 @@ namespace R4RAPI.Test.Services
             public QueryContainer TEST_GetQueryForFilterField(string field, string[] filters) => this.GetQueryForFilterField(field, filters);
             public TermQuery TEST_GetQueryForField(string field, string value) => this.GetQueryForField(field, value);
         }
+
+        #region GetFullQuery
+
+        #endregion
+
+        #region GetAllFiltersForQuery
+
+        public static IEnumerable<object[]> GetAllFiltersScenarioData => new[] {
+            //Single Group, Single Param
+            new object[] {
+                new Dictionary<string, string[]>{
+                    {"filterG1", new string[]{"filter1"}} 
+                },
+                new string[]{
+                    @"{ ""term"": { ""filterG1"": { ""value"": ""filter1"" } } }"
+                }
+            },
+            //Two groups each with single param
+            new object[] {
+                new Dictionary<string, string[]>{
+                    {"filterG1", new string[]{"filter1"}},
+                    {"filterG2", new string[]{"filter1"}}
+                },
+                new string[]{
+                    @"{ ""term"": { ""filterG1"": { ""value"": ""filter1"" } } }",
+                    @"{ ""term"": { ""filterG2"": { ""value"": ""filter1"" } } }"
+                }
+            },
+            //Single Group, Multi Param
+            new object[] {
+                new Dictionary<string, string[]>{
+                    {"filterG1", new string[]{"filter1", "filter2"}}
+                },
+                new string[]{
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""term"": { ""filterG1"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1"": { ""value"": ""filter2"" } } }
+                            ], 
+                            ""minimum_should_match"": 1,
+                            ""disable_coord"": null,
+                            ""_name"": null,
+                            ""boost"": null
+                        }
+                    }
+                    "
+                }
+            },
+            //Multi Group, One Single and One Multi Param
+            new object[] {
+                new Dictionary<string, string[]>{
+                    {"filterG2", new string[]{"filter1"}},
+                    {"filterG1", new string[]{"filter1", "filter2"}}
+                },
+                new string[]{
+                    @"{ ""term"": { ""filterG2"": { ""value"": ""filter1"" } } }",
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""term"": { ""filterG1"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1"": { ""value"": ""filter2"" } } }
+                            ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
+                        }
+                    }
+                    "
+                }
+            },
+            //Multi Group, One Single and One Multi Param
+            new object[] {
+                new Dictionary<string, string[]>{
+                    {"filterG2", new string[]{"filter1", "filter2"}},
+                    {"filterG1", new string[]{"filter1", "filter2"}}
+                },
+                new string[]{
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""term"": { ""filterG2"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG2"": { ""value"": ""filter2"" } } }
+                            ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
+                        }
+                    }",
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""term"": { ""filterG1"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1"": { ""value"": ""filter2"" } } }
+                            ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
+                        }
+                    }
+                    "
+                }
+            },
+        };
+
+        [Theory, MemberData(nameof(GetAllFiltersScenarioData))]
+        public void GetAllFiltersForQuery_Scenarios(Dictionary<string, string[]> filters, string[] expectedFilters)
+        {
+            var filterQueries = this._junkSvc.TEST_GetAllFiltersForQuery(filters);
+            BoolQuery actual = new BoolQuery
+            {
+                Filter = filterQueries
+            };
+
+            string pre = @"{ ""bool"": { ""filter"": [";
+            string post = @"], ""minimum_should_match"": null, ""disable_coord"": null,""_name"": null,""boost"": null}}";
+            string expected = pre + string.Join(',', expectedFilters) + post;
+
+            ElasticTools.AssertQueryJson(expected, actual);
+        }
+
+        [Fact]
+        public void GetAllFiltersForQuery_GetEmpty()
+        {
+            var actual = this._junkSvc.TEST_GetAllFiltersForQuery(new Dictionary<string, string[]>());
+            Assert.Equal(0, actual.Count());
+        }
+
+        #endregion
+
+        #region GetQueryForFilterField 
 
         [Fact]
         public void GetQueryForFilterField_GetEmpty()
@@ -84,6 +211,8 @@ namespace R4RAPI.Test.Services
             ElasticTools.AssertQueryJson(expectedStr, query);
 
         }
+
+        #endregion
 
         [Fact]
         public void GetQueryForField()

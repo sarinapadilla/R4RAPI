@@ -121,7 +121,7 @@ namespace NCI.OCPL.Utils.Testing
                 ContractResolver = new ElasticContractResolver(connectionSettings, new List<Func<Type, JsonConverter>>())
             }));
 
-            Assert.Equal(expected, actual);
+            Assert.Equal(expected, actual, new JTokenEqualityComparer());
         }
 
         /// <summary>
