@@ -135,15 +135,21 @@ namespace R4RAPI.Controllers
             }
 
             // Set default values for params
+            //facetsBeingRequest is used because if we modify the original params
+            //then the OriginalString of the response will show the default 
+            //include facets.
+            string[] facetsBeingRequested = new string[] { };
             if (IsNullOrEmpty(includeFacets))
             {
-                includeFacets = GetDefaultIncludeFacets();
+                facetsBeingRequested = GetDefaultIncludeFacets();
             }
             else if (!ValidateFacetList(includeFacets))
             {
                 //TODO: Actually list the invalid facets
                 _logger.LogError("Included facets in query are not valid.");
                 throw new ArgumentException("Included facets in query are not valid.");
+            } else {
+                facetsBeingRequested = includeFacets;
             }
 
             if (IsNullOrEmpty(includeFields))
@@ -153,6 +159,7 @@ namespace R4RAPI.Controllers
 
             //Create the results object
             ResourceResults results = new ResourceResults();
+            bool noMatchedResults = true;
 
             //Now call query results & get aggs at the same time.
             await Task.WhenAll(
@@ -162,35 +169,46 @@ namespace R4RAPI.Controllers
                     ResourceQueryResult queryResults = await _queryService.QueryResourcesAsync(resourceQuery, size, from, includeFields);
 
                     // Convert query results into ResourceResults
-                    if (queryResults != null)
+                    PageMetaData meta = new PageMetaData
                     {
-                        PageMetaData meta = new PageMetaData
+                        TotalResults = queryResults.TotalResults,
+                        OriginalQuery = _urlHelper.RouteUrl(new
                         {
-                            TotalResults = queryResults.TotalResults,
-                            OriginalQuery = _urlHelper.RouteUrl(new
-                            {
-                                size,
-                                from,
-                                q = keyword,
-                                toolTypes,
-                                toolSubtypes = subTypes,
-                                researchAreas,
-                                researchTypes,
-                                docs,
-                                include = includeFields,
-                                includeFacets
-                            })
-                        };
-                        results.Meta = meta;
-                        results.Results = queryResults.Results;
-                    }
+                            size,
+                            from,
+                            q = keyword,
+                            toolTypes,
+                            toolSubtypes = subTypes,
+                            researchAreas,
+                            researchTypes,
+                            docs,
+                            include = includeFields,
+                            //DO NOT USE facetsBeingRequested HERE. This is the original list provided by the user.
+                            includeFacets
+                        })
+                    };
+                    results.Meta = meta;
+                    results.Results = queryResults.Results;
+
+                    //While we may have asked for size 0, this will still tell us if the full query has results.
+                    noMatchedResults = queryResults.TotalResults == 0;
                 }),
                 Task.Run(async () =>
                 {
                     // Perform query for facet aggregations (using includeFacets param if it's given, otherwise default facets to include from options)
-                    results.Facets = await GetFacets(includeFacets, resourceQuery); //Go back to sync now.
+                results.Facets = await GetFacets(facetsBeingRequested, resourceQuery); //Go back to sync now.
                 })
             );
+
+            //Multiselect facets will query all filters except thier own.  So,
+            //you can have no search results returned, but still get a facet.
+            //For example, /resources?researchAreas=chicken will actually return
+            //all the facet items for researchAreas.  This code below removes
+            //all facets when there are 0 results, unless the user has asked for
+            //a query size of 0;
+            if (noMatchedResults) {
+                results.Facets = new Facet[] { };
+            }
 
 
             return results;
