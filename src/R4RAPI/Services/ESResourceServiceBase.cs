@@ -75,22 +75,6 @@ namespace R4RAPI.Services
         }
 
         /// <summary>
-        /// Gets the keyword part of the query.
-        /// </summary>
-        /// <returns>The keyword query.</returns>
-        /// <param name="keyword">Keyword.</param>
-        protected QueryContainer GetKeywordQuery(string keyword) {
-            QueryContainer query = null;
-            if (!string.IsNullOrEmpty(keyword)) {
-                query = new BoolQuery
-                {
-                    Should = GetFullTextQuery(GetTextQueryDefinition(), keyword)
-                };
-            }
-            return query;
-        }
-
-        /// <summary>
         /// Gets a query object to be used for all filters. 
         /// </summary>
         /// <remarks>
@@ -176,8 +160,13 @@ namespace R4RAPI.Services
             return query;
         }
 
+        /// <summary>
+        /// Gets the list of full text fields to use for query building.
+        /// </summary>
+        /// <returns>The full text fields.</returns>
         protected FullTextField[] GetTextQueryDefinition()
         {
+            // TODO: Remove this method!!! This is for testing purposes only. Eventually we want to read in the fields from the config.
             var fields = new FullTextField[]
             {
                 new FullTextField
@@ -192,29 +181,43 @@ namespace R4RAPI.Services
         }
 
         /// <summary>
+        /// Gets the keyword part of the query.
+        /// </summary>
+        /// <returns>The keyword query.</returns>
+        /// <param name="keyword">Keyword.</param>
+        protected QueryContainer GetKeywordQuery(string keyword)
+        {
+            QueryContainer query = null;
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = new BoolQuery
+                {
+                    Should = GetFullTextQuery(keyword, GetTextQueryDefinition())
+                };
+            }
+            return query;
+        }
+
+        /// <summary>
         /// Gets a list of QueryContainers for all fulltext fields.
         /// </summary>
         /// <returns>The QueryContainers for all fulltext fields.</returns>
         /// <param name="fields">Full-text fields.</param>
-        /// <param name="query">Query text.</param>
-        protected IEnumerable<QueryContainer> GetFullTextQuery(FullTextField[] fields, string query)
+        /// <param name="keyword">Keyword text.</param>
+        protected IEnumerable<QueryContainer> GetFullTextQuery(string keyword, FullTextField[] fields)
         {
-            List<QueryContainer> fullTextQuery = new List<QueryContainer>();
-
             if(fields.Length > 0)
             {
                 foreach(FullTextField field in fields)
                 {
-                    fullTextQuery.AddRange(GetQueryForFullTextField(field.FieldName, query, field.Boost, field.MatchTypes));
+                    foreach (QueryContainer q in GetQueryForFullTextField(field.FieldName, keyword, field.Boost, field.MatchTypes))
+                        yield return q;
                 }
             }
             else
             {
                 throw new Exception("There must be more than one full text field for query.");
             }
-
-
-            return null;
         }
 
         
@@ -223,17 +226,17 @@ namespace R4RAPI.Services
         /// </summary>
         /// <returns>The query for the fulltext field.</returns>
         /// <param name="field">Field.</param>
-        /// <param name="query">Query text.</param>
+        /// <param name="keyword">Keyword text.</param>
         /// <param name="boost">Boost.</param>
         /// <param name="matchTypes">Match types.</param>
-        protected IEnumerable<QueryContainer> GetQueryForFullTextField(string field, string query, int boost, string[] matchTypes)
+        protected IEnumerable<QueryContainer> GetQueryForFullTextField(string field, string keyword, int boost, string[] matchTypes)
         {
             IEnumerable<QueryContainer> fullTextFieldQuery = new QueryContainer[] { };
 
             if (matchTypes.Length > 0)
             {
                 fullTextFieldQuery = from matchType in matchTypes
-                                     select GetQueryForMatchType(field, query, boost, matchType);
+                                     select GetQueryForMatchType(field, keyword, boost, matchType);
             }
             else
             {
@@ -248,10 +251,10 @@ namespace R4RAPI.Services
         /// </summary>
         /// <returns>The query for the specific match type of the fulltext field.</returns>
         /// <param name="field">Field.</param>
-        /// <param name="query">Query text.</param>
+        /// <param name="keyword">Keyword text.</param>
         /// <param name="boost">Boost.</param>
         /// <param name="matchType">Match type.</param>
-        protected QueryContainer GetQueryForMatchType(string field, string query, int boost, string matchType)
+        protected QueryContainer GetQueryForMatchType(string field, string keyword, int boost, string matchType)
         {
             switch(matchType)
             {
@@ -259,7 +262,7 @@ namespace R4RAPI.Services
                     return new CommonTermsQuery
                     {
                         Field = field,
-                        Query = query,
+                        Query = keyword,
                         Boost = boost,
                         LowFrequencyOperator = Operator.And
                     };
@@ -267,14 +270,14 @@ namespace R4RAPI.Services
                     return new MatchQuery
                     {
                         Field = field,
-                        Query = query,
+                        Query = keyword,
                         Boost = boost
                     };
                 case "match_phrase":
                     return new MatchPhraseQuery
                     {
                         Field = field,
-                        Query = query,
+                        Query = keyword,
                         Boost = boost
                     };
                 default:
