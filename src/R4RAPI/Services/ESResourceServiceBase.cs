@@ -173,5 +173,64 @@ namespace R4RAPI.Services
 
             return query;
         }
+
+        protected Object[] GetTextQueryDefinition()
+        {
+            var fields = new Object[]
+            {
+                new
+                {
+                    FieldName = "body._fulltext",
+                    Boost = 1,
+                    MatchTypes = new string[] { "common" }
+                },
+            };
+
+            return fields;
+        }
+
+        protected QueryContainer[] BuildFullTextQuery(Object[] fields)
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Gets a QueryContainer for a given fulltext field.
+        /// </summary>
+        /// <returns>The query for fulltext field.</returns>
+        /// <param name="field">Field.</param>
+        /// <param name="query">Query text.</param>
+        /// <param name="boost">Boost.</param>
+        /// <param name="matchType">Match type.</param>
+        protected QueryContainer GetQueryForMatchType(string field, string query, int boost, string matchType)
+        {
+            switch(matchType)
+            {
+                case "match":
+                    return new MatchQuery
+                    {
+                        Field = field,
+                        Query = query,
+                        Boost = boost
+                    };
+                case "match_phrase":
+                    return new MatchPhraseQuery
+                    {
+                        Field = field,
+                        Query = query,
+                        Boost = boost
+                    };
+                case "common":
+                    return new CommonTermsQuery
+                    {
+                        Field = field,
+                        Query = query,
+                        Boost = boost,
+                        LowFrequencyOperator = Operator.And
+                    };
+                default:
+                    return null;
+            }
+        }
     }
 }
