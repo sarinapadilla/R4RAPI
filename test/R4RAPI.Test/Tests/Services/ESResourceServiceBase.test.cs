@@ -236,54 +236,67 @@ namespace R4RAPI.Test.Services
 
         #region GetFullTextQuery
 
-        /*
-        public static IEnumerable<object[]> GeFullTextQueryScenarioData => new[] {
+        public static IEnumerable<object[]> GetFullTextQueryScenarioData => new[] {
             //Single Field, Single MatchType
             new object[] {
                 "testkeyword",
-                new R4RAPIOptions.FullTextFieldConfig
+                new R4RAPIOptions.FullTextFieldConfig[]
                 {
-                    FieldName = "testfield",
-                    Boost = 1,
-                    MatchTypes = new string [] { "common" }
-                },
-                new string[]{
-                    @"{ ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }"
-                }
-            },
-            //Single Field, Multiple MatchTypes
-            new object[] {
-                "testkeyword",
-                new R4RAPIOptions.FullTextFieldConfig
-                {
-                    FieldName = "testfield",
-                    Boost = 1,
-                    MatchTypes = new string [] { "common", "match" }
+                    new R4RAPIOptions.FullTextFieldConfig
+                    {
+                        FieldName = "testfield1",
+                        Boost = 1,
+                        MatchTypes = new string[] { "common", "match" }
+                    },
+                    new R4RAPIOptions.FullTextFieldConfig
+                    {
+                        FieldName = "testfield2",
+                        Boost = 1,
+                        MatchTypes = new string[] { "common" }
+                    },
+                    new R4RAPIOptions.FullTextFieldConfig
+                    {
+                        FieldName = "testfield3",
+                        Boost = 1,
+                        MatchTypes = new string[] { "common", "match", "match_phrase" }
+                    },
+                    new R4RAPIOptions.FullTextFieldConfig
+                    {
+                        FieldName = "testfield4",
+                        Boost = 1,
+                        MatchTypes = new string[] { "match" }
+                    }
                 },
                 new string[]{
                     @"
-                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
-                        { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } }
+                        { ""common"": { ""testfield1"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""match"": { ""testfield1"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield2"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield3"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""match"": { ""testfield3"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""match"": { ""testfield3"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                        { ""match"": { ""testfield4"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        
                     "
                 }
             }
         };
 
-        [Theory, MemberData(nameof(GeFullTextQueryScenarioData))]
-        public void GetFullTextQuery_Scenarios(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields)
+        [Theory, MemberData(nameof(GetFullTextQueryScenarioData))]
+        public void GetFullTextQuery_Scenarios(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields, string[] expectedFullTextQuery)
         {
-            var fullTextFieldQueries = this._junkSvc.TEST_GetFullTextQuery(keyword, fields);
+            var fullTextQuery = this._junkSvc.TEST_GetFullTextQuery(keyword, fields);
             BoolQuery actual = new BoolQuery
             {
-                Should = fullTextFieldQueries
+                Should = fullTextQuery
             };
 
             string pre = @"{ ""bool"": { ""should"": [";
             string post = @"], ""minimum_should_match"": null, ""disable_coord"": null,""_name"": null,""boost"": null } }";
-            string expected = pre + string.Join(',', expectedFullTextFieldQueries) + post;
+            string expected = pre + string.Join(',', expectedFullTextQuery) + post;
 
             ElasticTools.AssertQueryJson(expected, actual);
-        }*/
+        }
 
         // Full text query with two fields, one with multiple match types
         [Fact]
@@ -337,7 +350,7 @@ namespace R4RAPI.Test.Services
 
         // Data for testing field query building
         public static IEnumerable<object[]> GetQueryForFullTextFieldScenarioData => new[] {
-            //Single Field, Single MatchType
+            // Single MatchType
             new object[] {
                 "testkeyword",
                 new R4RAPIOptions.FullTextFieldConfig
@@ -350,7 +363,7 @@ namespace R4RAPI.Test.Services
                     @"{ ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }"
                 }
             },
-            //Single Field, Multiple MatchTypes
+            // Multiple MatchTypes
             new object[] {
                 "testkeyword",
                 new R4RAPIOptions.FullTextFieldConfig
@@ -363,6 +376,23 @@ namespace R4RAPI.Test.Services
                     @"
                         { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } }
+                    "
+                }
+            },
+            // Multiple MatchTypes
+            new object[] {
+                "testkeyword",
+                new R4RAPIOptions.FullTextFieldConfig
+                {
+                    FieldName = "testfield",
+                    Boost = 1,
+                    MatchTypes = new string [] { "common", "match", "match_phrase" }
+                },
+                new string[]{
+                    @"
+                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } }
                     "
                 }
             }

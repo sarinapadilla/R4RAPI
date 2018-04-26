@@ -42,18 +42,15 @@ namespace R4RAPI.Test.Services
         [Fact]
         public void Get_NotFound()
         {
-
             //Create new ESRegAggConnection...
             IConnection conn = new ESResQSvcGetConn("Resource_NotFound", 404);
 
-            //Expected Aggs
-            Resource expected = null;
-
             ESResourceQueryService svc = this.GetService<ESResourceQueryService>(conn);
-            Resource actual = svc.Get("1010");
 
-            //Order does matter here, so we can compare the arrays
-            Assert.Equal(expected, actual);
+            Assert.ThrowsAny<Exception>(() =>
+            {
+                Resource actual = svc.Get("1010");
+            });
         }
 
         #endregion
