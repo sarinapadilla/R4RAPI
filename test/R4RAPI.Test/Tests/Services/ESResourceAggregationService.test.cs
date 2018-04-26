@@ -18,6 +18,57 @@ namespace R4RAPI.Test.Services
     public class ESResourceAggregationService_Tests : TestESResourceServiceBase
     {
 
+        #region Error Handling
+
+        [Fact]
+        public void GetKLA_TestFieldNull() {
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+            
+            
+            Assert.ThrowsAny<Exception>(() => {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation(
+                    null, 
+                    new ResourceQuery {
+                        Filters = new Dictionary<string,string[]> {
+                        { "toolTypes", new string[] { "datasets_databases" } }
+                        } 
+                    }
+                );
+            });
+        }
+
+        [Fact]
+        public void GetKLA_TestQueryNull() {
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+            
+            Assert.ThrowsAny<Exception>(() => {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation(
+                    "toolSubtypes", 
+                    null
+                );
+            });
+        }
+
+        [Fact]
+        public void GetKLA_TestBadFacet() {
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+            
+            Assert.ThrowsAny<Exception>(() => {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation(
+                    "chicken", 
+                    new ResourceQuery {
+                        Filters = new Dictionary<string,string[]> {
+                        { "toolTypes", new string[] { "datasets_databases" } }
+                        } 
+                    }
+                );
+            });
+        }
+        #endregion
+
         #region Test Query Building
 
         [Fact]
