@@ -13,6 +13,8 @@ using NCI.OCPL.Utils.Testing;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
+using FluentAssertions;
+
 namespace R4RAPI.Test.Services
 {
     public class ESResourceQueryService_Tests : TestESResourceServiceBase
@@ -33,7 +35,8 @@ namespace R4RAPI.Test.Services
             Resource actual = svc.Get("101");
 
             //Order does matter here, so we can compare the arrays
-            Assert.Equal(expected, actual);
+            //Assert.Equal(expected, actual);
+            actual.Should().BeEquivalentTo(expected);
         }
 
         [Fact]
