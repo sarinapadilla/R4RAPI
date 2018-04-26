@@ -22,6 +22,12 @@ namespace R4RAPI.Models
         /// <value>The available facets.</value>
         public Dictionary<string, FacetConfig> AvailableFacets { get; set; } = new Dictionary<string, FacetConfig>();
 
+        /// <summary>
+        /// Gets or sets the available full text fields and their configuration for the API
+        /// </summary>
+        /// <value>The available full text fields.</value>
+        public Dictionary<string,FullTextFieldConfig> AvailableFullTextFields { get; set; } = new Dictionary<string, FullTextFieldConfig>();
+
         #region Sub classes
 
         /// <summary>
@@ -82,6 +88,30 @@ namespace R4RAPI.Models
             /// <value>The requires filter.</value>
             public string RequiresFilter { get; set; }
 
+        }
+
+        /// <summary>
+        /// Configuration information for a full text field
+        /// </summary>
+        public class FullTextFieldConfig
+        {
+            /// <summary>
+            /// Gets or sets the name of the full text field.
+            /// </summary>
+            /// <value>The name of the field.</value>
+            public string FieldName { get; set; }
+
+            /// <summary>
+            /// Gets or sets the boost value for the full text field.
+            /// </summary>
+            /// <value>The boost value.</value>
+            public int Boost { get; set; }
+
+            /// <summary>
+            /// Gets or sets the match types for the full text field.
+            /// </summary>
+            /// <value>The match types.</value>
+            public string[] MatchTypes { get; set; } = new string[] { };
         }
 
         #endregion

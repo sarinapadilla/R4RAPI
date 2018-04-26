@@ -94,6 +94,43 @@ namespace R4RAPI.Test.Services
                             IncludeInDefault= false
                         }
                     }
+                },
+                AvailableFullTextFields = new Dictionary<string, R4RAPIOptions.FullTextFieldConfig> {
+                    {
+                        "title", new R4RAPIOptions.FullTextFieldConfig {
+                            FieldName = "title",
+                            Boost = 1,
+                            MatchTypes = new string[] { "common", "match", "match_phrase" }
+                        }
+                    },
+                    {
+                        "body", new R4RAPIOptions.FullTextFieldConfig {
+                            FieldName = "body",
+                            Boost = 1,
+                            MatchTypes = new string[] { "common", "match", "match_phrase" }
+                        }
+                    },
+                    {
+                        "pocs.lastname", new R4RAPIOptions.FullTextFieldConfig {
+                            FieldName = "pocs.lastname",
+                            Boost = 1,
+                            MatchTypes = new string[] { "match"}
+                        }
+                    },
+                    {
+                        "pocs.firstname", new R4RAPIOptions.FullTextFieldConfig {
+                            FieldName = "pocs.firstname",
+                            Boost = 1,
+                            MatchTypes = new string[] { "match"}
+                        }
+                    },
+                    {
+                        "pocs.middlename", new R4RAPIOptions.FullTextFieldConfig {
+                            FieldName = "pocs.middlename",
+                            Boost = 1,
+                            MatchTypes = new string[] { "match"}
+                        }
+                    }
                 }
             };
 

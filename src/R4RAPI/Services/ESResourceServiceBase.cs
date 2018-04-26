@@ -49,11 +49,24 @@ namespace R4RAPI.Services
         /// <remarks>This is used by both the Query and Aggregation services.</remarks>
         /// <returns>A QueryContainer representing the entire query.  </returns>
         /// <param name="keyword">Keyword for the search</param>
+        /// <param name="fullTextFieldsList">The complete full text fields list</param>
         /// <param name="filtersList">The complete filters list</param>
         protected QueryContainer GetFullQuery(string keyword, Dictionary<string, string[]> filtersList) {
             QueryContainer query = null;
 
-            QueryContainer keywordQuery = GetKeywordQuery(keyword);
+            // Get list of full text fields from options for query building
+            R4RAPIOptions.FullTextFieldConfig[] fullTextFieldsList = null;
+            try
+            {
+                fullTextFieldsList = this._apiOptions.AvailableFullTextFields.Select(f => f.Value).ToArray();
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError("Could not fetch full text fields from configuration.");
+                throw new Exception("Could not fetch full text fields from configuration.", ex);
+            }
+
+            QueryContainer keywordQuery = GetKeywordQuery(keyword, fullTextFieldsList);
             IEnumerable<QueryContainer> filtersQueries = GetAllFiltersForQuery(filtersList);
 
             if (keywordQuery != null && filtersQueries.Count() > 0) {
@@ -160,13 +173,13 @@ namespace R4RAPI.Services
             return query;
         }
 
+        /*
         /// <summary>
         /// Gets the list of full text fields to use for query building.
         /// </summary>
         /// <returns>The full text fields.</returns>
         protected FullTextField[] GetTextQueryDefinition()
         {
-            // TODO: Remove this method!!! This is for testing purposes only. Eventually we want to read in the fields from the config.
             var fields = new FullTextField[]
             {
                 new FullTextField
@@ -178,21 +191,22 @@ namespace R4RAPI.Services
             };
 
             return fields;
-        }
+        }*/
 
         /// <summary>
         /// Gets the keyword part of the query.
         /// </summary>
         /// <returns>The keyword query.</returns>
         /// <param name="keyword">Keyword.</param>
-        protected QueryContainer GetKeywordQuery(string keyword)
+        /// <param name="fields">Full text fields.</param>
+        protected QueryContainer GetKeywordQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields)
         {
             QueryContainer query = null;
             if (!string.IsNullOrEmpty(keyword))
             {
                 query = new BoolQuery
                 {
-                    Should = GetFullTextQuery(keyword, GetTextQueryDefinition())
+                    Should = GetFullTextQuery(keyword, fields)
                 };
             }
             return query;
@@ -202,24 +216,27 @@ namespace R4RAPI.Services
         /// Gets a list of QueryContainers for all fulltext fields.
         /// </summary>
         /// <returns>The QueryContainers for all fulltext fields.</returns>
-        /// <param name="fields">Full-text fields.</param>
         /// <param name="keyword">Keyword text.</param>
-        protected IEnumerable<QueryContainer> GetFullTextQuery(string keyword, FullTextField[] fields)
+        /// <param name="fields">Full-text fields.</param>
+        protected IEnumerable<QueryContainer> GetFullTextQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields)
         {
             if(fields.Length > 0)
             {
-                foreach(FullTextField field in fields)
+                QueryContainer[] fullTextFieldQueries = fields.SelectMany(f => GetQueryForFullTextField(f.FieldName, keyword, f.Boost, f.MatchTypes)).ToArray();
+
+                return fullTextFieldQueries;
+
+                /*foreach(R4RAPIOptions.FullTextFieldConfig field in fields)
                 {
                     foreach (QueryContainer q in GetQueryForFullTextField(field.FieldName, keyword, field.Boost, field.MatchTypes))
                         yield return q;
-                }
+                }*/
             }
             else
             {
                 throw new Exception("There must be more than one full text field for query.");
             }
         }
-
         
         /// <summary>
         /// Gets a QueryContainer for a given fulltext field.

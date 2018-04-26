@@ -34,11 +34,11 @@ namespace R4RAPI.Test.Services
 
             //Wrapping protected methods for testing
             public QueryContainer TEST_GetFullQuery(string keyword, Dictionary<string, string[]> filtersList) => this.GetFullQuery(keyword, filtersList);
-            public QueryContainer TEST_GetKeywordQuery(string keyword) => this.GetKeywordQuery(keyword);
+            public QueryContainer TEST_GetKeywordQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fullTextFieldsList) => this.GetKeywordQuery(keyword, fullTextFieldsList);
             public IEnumerable<QueryContainer> TEST_GetAllFiltersForQuery(Dictionary<string, string[]> filtersList) => this.GetAllFiltersForQuery(filtersList);
             public QueryContainer TEST_GetQueryForFilterField(string field, string[] filters) => this.GetQueryForFilterField(field, filters);
             public TermQuery TEST_GetQueryForField(string field, string value) => this.GetQueryForField(field, value);
-            public IEnumerable<QueryContainer> TEST_GetFullTextQuery(string keyword, FullTextField[] fields) => this.GetFullTextQuery(keyword, fields);
+            public IEnumerable<QueryContainer> TEST_GetFullTextQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields) => this.GetFullTextQuery(keyword, fields);
             public IEnumerable<QueryContainer> TEST_GetQueryForFullTextField(string field, string keyword, int boost, string[] matchTypes) => this.GetQueryForFullTextField(field, keyword, boost, matchTypes);
             public QueryContainer TEST_GetQueryForMatchType(string field, string keyword, int boost, string matchType) => this.GetQueryForMatchType(field, keyword, boost, matchType);
             
@@ -235,20 +235,71 @@ namespace R4RAPI.Test.Services
         #endregion
 
         #region GetFullTextQuery
+
+        /*
+        public static IEnumerable<object[]> GeFullTextQueryScenarioData => new[] {
+            //Single Field, Single MatchType
+            new object[] {
+                "testkeyword",
+                new R4RAPIOptions.FullTextFieldConfig
+                {
+                    FieldName = "testfield",
+                    Boost = 1,
+                    MatchTypes = new string [] { "common" }
+                },
+                new string[]{
+                    @"{ ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }"
+                }
+            },
+            //Single Field, Multiple MatchTypes
+            new object[] {
+                "testkeyword",
+                new R4RAPIOptions.FullTextFieldConfig
+                {
+                    FieldName = "testfield",
+                    Boost = 1,
+                    MatchTypes = new string [] { "common", "match" }
+                },
+                new string[]{
+                    @"
+                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } }
+                    "
+                }
+            }
+        };
+
+        [Theory, MemberData(nameof(GeFullTextQueryScenarioData))]
+        public void GetFullTextQuery_Scenarios(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields)
+        {
+            var fullTextFieldQueries = this._junkSvc.TEST_GetFullTextQuery(keyword, fields);
+            BoolQuery actual = new BoolQuery
+            {
+                Should = fullTextFieldQueries
+            };
+
+            string pre = @"{ ""bool"": { ""should"": [";
+            string post = @"], ""minimum_should_match"": null, ""disable_coord"": null,""_name"": null,""boost"": null } }";
+            string expected = pre + string.Join(',', expectedFullTextFieldQueries) + post;
+
+            ElasticTools.AssertQueryJson(expected, actual);
+        }*/
+
+        // Full text query with two fields, one with multiple match types
         [Fact]
         public void GetFullTextQuery_TwoFields()
         {
             var fullTextQuery = this._junkSvc.TEST_GetFullTextQuery(
                 "testkeyword",
-                new FullTextField[]
+                new R4RAPIOptions.FullTextFieldConfig[]
                 {
-                    new FullTextField
+                    new R4RAPIOptions.FullTextFieldConfig
                     {
                         FieldName = "testfield1",
                         Boost = 1,
                         MatchTypes = new string[] { "common", "match" }
                     },
-                    new FullTextField
+                    new R4RAPIOptions.FullTextFieldConfig
                     {
                         FieldName = "testfield2",
                         Boost = 1,
@@ -284,11 +335,12 @@ namespace R4RAPI.Test.Services
 
         #region GetQueryForFullTextField
 
+        // Data for testing field query building
         public static IEnumerable<object[]> GetQueryForFullTextFieldScenarioData => new[] {
             //Single Field, Single MatchType
             new object[] {
                 "testkeyword",
-                new FullTextField
+                new R4RAPIOptions.FullTextFieldConfig
                 {
                     FieldName = "testfield",
                     Boost = 1,
@@ -301,7 +353,7 @@ namespace R4RAPI.Test.Services
             //Single Field, Multiple MatchTypes
             new object[] {
                 "testkeyword",
-                new FullTextField
+                new R4RAPIOptions.FullTextFieldConfig
                 {
                     FieldName = "testfield",
                     Boost = 1,
@@ -316,8 +368,9 @@ namespace R4RAPI.Test.Services
             }
         };
 
+        // Queries for one field, multiple scenarios
         [Theory, MemberData(nameof(GetQueryForFullTextFieldScenarioData))]
-        public void GetQueryForFullTextField_Scenarios(string keyword, FullTextField field, string[] expectedFullTextFieldQueries)
+        public void GetQueryForFullTextField_Scenarios(string keyword, R4RAPIOptions.FullTextFieldConfig field, string[] expectedFullTextFieldQueries)
         {
             var fullTextFieldQueries = this._junkSvc.TEST_GetQueryForFullTextField(field.FieldName, keyword, field.Boost, field.MatchTypes);
             BoolQuery actual = new BoolQuery
@@ -332,7 +385,7 @@ namespace R4RAPI.Test.Services
             ElasticTools.AssertQueryJson(expected, actual);
         }
 
-
+        // Queries for one field with multiple match types
         [Fact]
         public void GetQueryForFullTextField_MultipleMatchTypes()
         {
@@ -360,6 +413,7 @@ namespace R4RAPI.Test.Services
             ElasticTools.AssertQueryJson(expectedStr, actual);
         }
 
+        // Queries for one field with single match type
         [Fact]
         public void GetQueryForFullTextField_SingleMatchType()
         {
@@ -390,6 +444,7 @@ namespace R4RAPI.Test.Services
 
         #region GetQueryForMatchType
 
+        // MatchType "common"
         [Fact]
         public void GetQueryForMatchType_Common()
         {
@@ -401,6 +456,7 @@ namespace R4RAPI.Test.Services
             ElasticTools.AssertQueryJson(expectedStr, query);
         }
 
+        // MatchType "match"
         [Fact]
         public void GetQueryForMatchType_Match()
         {
@@ -412,6 +468,7 @@ namespace R4RAPI.Test.Services
             ElasticTools.AssertQueryJson(expectedStr, query);
         }
 
+        // MatchType "match_phrase"
         [Fact]
         public void GetQueryForMatchType_MatchPhrase()
         {
@@ -423,6 +480,7 @@ namespace R4RAPI.Test.Services
             ElasticTools.AssertQueryJson(expectedStr, query);
         }
 
+        // MatchType invalid
         [Fact]
         public void GetQueryForMatchType_GetInvalidMatchType()
         {
@@ -432,6 +490,7 @@ namespace R4RAPI.Test.Services
             });
         }
 
+        // MatchType none
         [Fact]
         public void GetQueryForMatchType_GetEmpty()
         {
