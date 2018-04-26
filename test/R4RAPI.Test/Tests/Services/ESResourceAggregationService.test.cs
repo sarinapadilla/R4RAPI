@@ -13,6 +13,8 @@ using NCI.OCPL.Utils.Testing;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
+using R4RAPI.Test.Models;
+
 namespace R4RAPI.Test.Services
 {
     public class ESResourceAggregationService_Tests : TestESResourceServiceBase

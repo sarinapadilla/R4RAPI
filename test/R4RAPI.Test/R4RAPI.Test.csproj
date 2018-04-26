@@ -28,11 +28,15 @@
     <Folder Include="Tests\Services\TestDataObjects\" />
     <Folder Include="Tests\Services\TestDataObjects\ResourceAggSvc\" />
     <Folder Include="TestData\ESResAggSvcData\" />
+    <Folder Include="Tests\Services\TestDataObjects\ResourceQuerySvc\" />
+    <Folder Include="TestData\ESResQuerySvcData\" />
+    <Folder Include="Tests\Models\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json" />
     <None Remove="TestData\ESResAggSvcData\SubtoolTypes_WithToolType.json" />
     <None Remove="TestData\ESResAggSvcData\SubtoolTypes_WithToolType_NoResults.json" />
+    <None Remove="TestData\ESResQuerySvcData\Resource_101.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json">
@@ -42,6 +46,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\ESResAggSvcData\SubtoolTypes_WithToolType_NoResults.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\ESResQuerySvcData\Resource_101.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

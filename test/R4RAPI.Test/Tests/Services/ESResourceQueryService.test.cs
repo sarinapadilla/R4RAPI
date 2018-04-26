@@ -17,6 +17,27 @@ namespace R4RAPI.Test.Services
 {
     public class ESResourceQueryService_Tests : TestESResourceServiceBase
     {
+        #region Test Gets
+
+        [Fact]
+        public void Get_ValidID() {
+
+            //Create new ESRegAggConnection...
+
+            IConnection conn = new ESResQSvcGetConn("Resource_101");
+
+            //Expected Aggs
+            Resource expected = StaticResourceData.GetRes101();
+
+            ESResourceQueryService svc = this.GetService<ESResourceQueryService>(conn);
+            Resource actual = svc.Get("101");
+
+            //Order does matter here, so we can compare the arrays
+            Assert.Equal(expected, actual);
+        }
+
+        #endregion
+
         #region Test Query Building
 
         [Fact]

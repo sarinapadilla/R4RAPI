@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using R4RAPI.Models;
 
-namespace R4RAPI.Test.Services
+namespace R4RAPI.Test.Models
 {
     /// <summary>
     /// Key label agg result comparer.
