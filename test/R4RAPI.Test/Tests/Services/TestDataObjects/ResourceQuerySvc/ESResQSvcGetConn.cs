@@ -31,7 +31,7 @@ namespace R4RAPI.Test.Services
         /// Creates a new instance of the ESResAggSvcConnection class
         /// </summary>
         /// <param name="testFile">The JSON file for the test response</param>
-        public ESResQSvcGetConn(string testFile)
+        public ESResQSvcGetConn(string testFile, int status = 200)
         {
             this.TestFile = testFile;
 
@@ -43,7 +43,7 @@ namespace R4RAPI.Test.Services
                 //Get the file name for this round
                 res.Stream = TestingTools.GetTestFileAsStream(GetTestFileName());
 
-                res.StatusCode = 200;
+                res.StatusCode = status;
             });
         }
 
