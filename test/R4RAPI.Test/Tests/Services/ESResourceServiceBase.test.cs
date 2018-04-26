@@ -57,7 +57,7 @@ namespace R4RAPI.Test.Services
                     {"filterG1", new string[]{"filter1"}} 
                 },
                 new string[]{
-                    @"{ ""term"": { ""filterG1"": { ""value"": ""filter1"" } } }"
+                    @"{ ""term"": { ""filterG1.key"": { ""value"": ""filter1"" } } }"
                 }
             },
             //Two groups each with single param
@@ -67,8 +67,8 @@ namespace R4RAPI.Test.Services
                     {"filterG2", new string[]{"filter1"}}
                 },
                 new string[]{
-                    @"{ ""term"": { ""filterG1"": { ""value"": ""filter1"" } } }",
-                    @"{ ""term"": { ""filterG2"": { ""value"": ""filter1"" } } }"
+                    @"{ ""term"": { ""filterG1.key"": { ""value"": ""filter1"" } } }",
+                    @"{ ""term"": { ""filterG2.key"": { ""value"": ""filter1"" } } }"
                 }
             },
             //Single Group, Multi Param
@@ -81,8 +81,8 @@ namespace R4RAPI.Test.Services
                     {
                         ""bool"": {
                             ""should"": [
-                                { ""term"": { ""filterG1"": { ""value"": ""filter1"" } } },
-                                { ""term"": { ""filterG1"": { ""value"": ""filter2"" } } }
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter2"" } } }
                             ], 
                             ""minimum_should_match"": 1,
                             ""disable_coord"": null,
@@ -100,13 +100,13 @@ namespace R4RAPI.Test.Services
                     {"filterG1", new string[]{"filter1", "filter2"}}
                 },
                 new string[]{
-                    @"{ ""term"": { ""filterG2"": { ""value"": ""filter1"" } } }",
+                    @"{ ""term"": { ""filterG2.key"": { ""value"": ""filter1"" } } }",
                     @"
                     {
                         ""bool"": {
                             ""should"": [
-                                { ""term"": { ""filterG1"": { ""value"": ""filter1"" } } },
-                                { ""term"": { ""filterG1"": { ""value"": ""filter2"" } } }
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter2"" } } }
                             ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
                         }
                     }
@@ -124,8 +124,8 @@ namespace R4RAPI.Test.Services
                     {
                         ""bool"": {
                             ""should"": [
-                                { ""term"": { ""filterG2"": { ""value"": ""filter1"" } } },
-                                { ""term"": { ""filterG2"": { ""value"": ""filter2"" } } }
+                                { ""term"": { ""filterG2.key"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG2.key"": { ""value"": ""filter2"" } } }
                             ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
                         }
                     }",
@@ -133,8 +133,8 @@ namespace R4RAPI.Test.Services
                     {
                         ""bool"": {
                             ""should"": [
-                                { ""term"": { ""filterG1"": { ""value"": ""filter1"" } } },
-                                { ""term"": { ""filterG1"": { ""value"": ""filter2"" } } }
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter2"" } } }
                             ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
                         }
                     }
