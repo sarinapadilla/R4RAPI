@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.3.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
@@ -22,7 +23,6 @@
 
   <ItemGroup>
     <Folder Include="Tests\Services\" />
-    <Folder Include="Tests\" />
     <Folder Include="TestData\" />
     <Folder Include="Util\" />
     <Folder Include="Tests\Services\TestDataObjects\" />
@@ -30,7 +30,6 @@
     <Folder Include="TestData\ESResAggSvcData\" />
     <Folder Include="Tests\Services\TestDataObjects\ResourceQuerySvc\" />
     <Folder Include="TestData\ESResQuerySvcData\" />
-    <Folder Include="Tests\Models\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json" />
