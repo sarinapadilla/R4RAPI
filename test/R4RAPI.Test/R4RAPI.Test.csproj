@@ -37,6 +37,7 @@
     <None Remove="TestData\ESResAggSvcData\SubtoolTypes_WithToolType.json" />
     <None Remove="TestData\ESResAggSvcData\SubtoolTypes_WithToolType_NoResults.json" />
     <None Remove="TestData\ESResQuerySvcData\Resource_101.json" />
+    <None Remove="TestData\ESResQuerySvcData\Resource_NotFound.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestData\ESResAggSvcData\ResearchTypes_EmptyQuery.json">
@@ -49,6 +50,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\ESResQuerySvcData\Resource_101.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\ESResQuerySvcData\Resource_NotFound.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
