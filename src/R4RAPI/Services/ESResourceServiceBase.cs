@@ -164,34 +164,15 @@ namespace R4RAPI.Services
         /// <param name="field">Field.</param>
         /// <param name="value">Value.</param>
         protected TermQuery GetQueryForField(string field, string value)
-        {            
-            TermQuery query = new TermQuery {
+        {
+            TermQuery query = new TermQuery
+            {
                 Field = field,
                 Value = value
             };
 
             return query;
         }
-
-        /*
-        /// <summary>
-        /// Gets the list of full text fields to use for query building.
-        /// </summary>
-        /// <returns>The full text fields.</returns>
-        protected FullTextField[] GetTextQueryDefinition()
-        {
-            var fields = new FullTextField[]
-            {
-                new FullTextField
-                {
-                    FieldName = "body._fulltext",
-                    Boost = 1,
-                    MatchTypes = new string[] { "common" }
-                },
-            };
-
-            return fields;
-        }*/
 
         /// <summary>
         /// Gets the keyword part of the query.
@@ -220,22 +201,9 @@ namespace R4RAPI.Services
         /// <param name="fields">Full-text fields.</param>
         protected IEnumerable<QueryContainer> GetFullTextQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields)
         {
-            if(fields.Length > 0)
-            {
-                QueryContainer[] fullTextFieldQueries = fields.SelectMany(f => GetQueryForFullTextField(f.FieldName, keyword, f.Boost, f.MatchTypes)).ToArray();
+            QueryContainer[] fullTextFieldQueries = fields.SelectMany(f => GetQueryForFullTextField(f.FieldName, keyword, f.Boost, f.MatchTypes)).ToArray();
 
-                return fullTextFieldQueries;
-
-                /*foreach(R4RAPIOptions.FullTextFieldConfig field in fields)
-                {
-                    foreach (QueryContainer q in GetQueryForFullTextField(field.FieldName, keyword, field.Boost, field.MatchTypes))
-                        yield return q;
-                }*/
-            }
-            else
-            {
-                throw new Exception("There must be more than one full text field for query.");
-            }
+            return fullTextFieldQueries;
         }
         
         /// <summary>
@@ -250,15 +218,8 @@ namespace R4RAPI.Services
         {
             IEnumerable<QueryContainer> fullTextFieldQuery = new QueryContainer[] { };
 
-            if (matchTypes.Length > 0)
-            {
-                fullTextFieldQuery = from matchType in matchTypes
-                                     select GetQueryForMatchType(field, keyword, boost, matchType);
-            }
-            else
-            {
-                throw new ArgumentException($"Field {field} must have at least one match type.");
-            }
+            fullTextFieldQuery = from matchType in matchTypes
+                                 select GetQueryForMatchType(field, keyword, boost, matchType);
 
             return fullTextFieldQuery;
         }
@@ -281,7 +242,8 @@ namespace R4RAPI.Services
                         Field = field,
                         Query = keyword,
                         Boost = boost,
-                        LowFrequencyOperator = Operator.And
+                        LowFrequencyOperator = Operator.And,
+                        CutoffFrequency = 1
                     };
                 case "match":
                     return new MatchQuery

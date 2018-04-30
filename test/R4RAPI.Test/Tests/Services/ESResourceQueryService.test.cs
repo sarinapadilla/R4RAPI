@@ -75,13 +75,18 @@ namespace R4RAPI.Test.Services
                 {
                   ""from"": 0,
                   ""size"": 20,
+                  ""sort"": [
+                    { ""_score"": { } },
+                    { ""id"": { } }
+                  ],
                   ""query"": {
                     ""bool"": {
                         ""filter"": [
                             {""term"": { ""researchTypes.key"": { ""value"": ""basic"" }}}
                         ]
                     }
-                  }
+                  },
+
                 } 
             ");
             /*

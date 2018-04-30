@@ -269,10 +269,10 @@ namespace R4RAPI.Test.Services
                 },
                 new string[]{
                     @"
-                        { ""common"": { ""testfield1"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield1"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield1"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
-                        { ""common"": { ""testfield2"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
-                        { ""common"": { ""testfield3"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield2"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield3"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield3"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield3"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } },
                         { ""match"": { ""testfield4"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
@@ -329,9 +329,9 @@ namespace R4RAPI.Test.Services
                 {
                     ""bool"": {
                         ""should"": [
-                            { ""common"": { ""testfield1"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                            { ""common"": { ""testfield1"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                             { ""match"": { ""testfield1"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
-                            { ""common"": { ""testfield2"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }
+                            { ""common"": { ""testfield2"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }
                         ],
                         ""minimum_should_match"": null,
                         ""disable_coord"": null,
@@ -360,7 +360,7 @@ namespace R4RAPI.Test.Services
                     MatchTypes = new string [] { "common" }
                 },
                 new string[]{
-                    @"{ ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }"
+                    @"{ ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }"
                 }
             },
             // Multiple MatchTypes
@@ -374,7 +374,7 @@ namespace R4RAPI.Test.Services
                 },
                 new string[]{
                     @"
-                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } }
                     "
                 }
@@ -390,7 +390,7 @@ namespace R4RAPI.Test.Services
                 },
                 new string[]{
                     @"
-                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
                         { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } }
                     "
@@ -429,7 +429,7 @@ namespace R4RAPI.Test.Services
                 {
                     ""bool"": {
                         ""should"": [
-                            { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                            { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
                             { ""match"": { ""testfield"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } }
                         ],
                         ""minimum_should_match"": null,
@@ -457,7 +457,7 @@ namespace R4RAPI.Test.Services
                 {
                     ""bool"": {
                         ""should"": [
-                            { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }
+                            { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }
                         ],
                         ""minimum_should_match"": null,
                         ""disable_coord"": null,
@@ -480,7 +480,7 @@ namespace R4RAPI.Test.Services
         {
             var query = this._junkSvc.TEST_GetQueryForMatchType("testfield", "testkeyword", 1, "common");
             var expectedStr = @" 
-                { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }
+                { ""common"": { ""testfield"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } }
             ";
 
             ElasticTools.AssertQueryJson(expectedStr, query);

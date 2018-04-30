@@ -115,8 +115,12 @@ namespace R4RAPI.Services
             {
                 Size = size,
                 From = from,
+                Sort = new List<ISort>
+                {
+                    new SortField { Field = "_score" },
+                    new SortField { Field = "id" }
+                }
                 //TODO:
-                //  Add Sort = ["_score","id"]
                 //  Source = includeFields
             };
 
