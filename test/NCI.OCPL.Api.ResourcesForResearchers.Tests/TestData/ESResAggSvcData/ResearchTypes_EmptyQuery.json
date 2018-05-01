@@ -1,0 +1,96 @@
+﻿{
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 168,
+    "max_score": 0.0,
+    "hits": []
+  },
+  "aggregations": {
+    "researchTypes_agg": {
+      "doc_count": 233,
+      "researchTypes_key": {
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+        "buckets": [
+          {
+            "key": "basic",
+            "doc_count": 94,
+            "researchTypes_label": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "Basic",
+                  "doc_count": 94
+                }
+              ]
+            }
+          },
+          {
+            "key": "translational",
+            "doc_count": 66,
+            "researchTypes_label": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "Translational",
+                  "doc_count": 66
+                }
+              ]
+            }
+          },
+          {
+            "key": "clinical_trials",
+            "doc_count": 42,
+            "researchTypes_label": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "Clinical Trials",
+                  "doc_count": 42
+                }
+              ]
+            }
+          },
+          {
+            "key": "epidemiologic",
+            "doc_count": 26,
+            "researchTypes_label": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "Epidemiologic",
+                  "doc_count": 26
+                }
+              ]
+            }
+          },
+          {
+            "key": "clinical",
+            "doc_count": 5,
+            "researchTypes_label": {
+              "doc_count_error_upper_bound": 0,
+              "sum_other_doc_count": 0,
+              "buckets": [
+                {
+                  "key": "Clinical",
+                  "doc_count": 5
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
