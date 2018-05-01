@@ -172,6 +172,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
                     PageMetaData meta = new PageMetaData
                     {
                         TotalResults = queryResults.TotalResults,
+                        StartFrom = queryResults.StartFrom,
                         OriginalQuery = _urlHelper.RouteUrl(new
                         {
                             size,

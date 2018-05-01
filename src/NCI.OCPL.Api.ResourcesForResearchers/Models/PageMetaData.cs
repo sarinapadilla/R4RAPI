@@ -17,6 +17,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Models
         public int TotalResults { get; set; }
 
         /// <summary>
+        /// The offset that the results start from
+        /// </summary>
+        /// <value>The offset to start from.</value>
+        public int StartFrom { get; set; }
+
+        /// <summary>
         /// The original query, for which the resource results are returned
         /// </summary>
         /// <value>The original query.</value>
