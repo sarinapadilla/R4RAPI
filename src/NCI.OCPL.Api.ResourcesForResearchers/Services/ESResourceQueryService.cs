@@ -155,7 +155,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
 
                     queryResults.Results = resourceResults.ToArray();
                     queryResults.TotalResults = Convert.ToInt32(response.Total);
-                    queryResults.StartFrom = from;
+                    queryResults.From = from;
                 }
             }
             catch (Exception ex)
