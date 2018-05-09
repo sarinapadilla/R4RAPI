@@ -59,7 +59,49 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
 
         [Fact]
         public void QueryResources_EmptyQuery() {
-            
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                  ""from"": 0,
+                  ""size"": 20,
+                  ""sort"": [
+                    { ""_score"": { } },
+                    { ""id"": { } }
+                  ]
+                } 
+            ");
+            /*
+            */
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            var svc = this.GetService<ESResourceQueryService>(conn);
+            try
+            {
+                var results = svc.QueryResources(
+                    new ResourceQuery
+                    {
+                        Keyword = null,
+                        Filters = new Dictionary<string, string[]> { }
+                    }
+                );
+            }
+            catch (Exception) { } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
         }
 
         [Fact]
@@ -117,6 +159,80 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
 
             Assert.Equal(expectedPath, actualPath);
             Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());            
+        }
+
+        [Fact]
+        public void QueryResources_SingleFilter_Keyword()
+        {
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                  ""from"": 0,
+                  ""size"": 20,
+                  ""sort"": [
+                    { ""_score"": { } },
+                    { ""id"": { } }
+                  ],
+                  ""query"": {
+                    ""bool"": {
+                      ""filter"": [
+                        {""term"": { ""researchTypes.key"": { ""value"": ""basic"" }}}
+                      ],
+                      ""must"": [                        
+                        {
+                          ""bool"": {
+                            ""should"": [
+                              { ""common"": { ""title._fulltext"": { ""query"": ""CGCI"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                              { ""match"": { ""title._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0 } } },
+                              { ""match"": { ""title._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                              { ""common"": { ""body._fulltext"": { ""query"": ""CGCI"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                              { ""match"": { ""body._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0 } } },
+                              { ""match"": { ""body._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                              { ""match"": { ""pocs.lastname._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0 } } },
+                              { ""match"": { ""pocs.firstname._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0 } } },
+                              { ""match"": { ""pocs.middlename._fulltext"": { ""query"": ""CGCI"", ""boost"": 1.0 } } }
+                            ]
+                          }
+                        }
+                      ]
+                    } 
+                  }
+                } 
+            ");
+            /*
+            */
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            var svc = this.GetService<ESResourceQueryService>(conn);
+            try
+            {
+                var results = svc.QueryResources(
+                    new ResourceQuery
+                    {
+                        Keyword = "CGCI",
+                        Filters = new Dictionary<string, string[]>{
+                            { "researchTypes", new string[] { "basic"} }
+                        }
+                    }
+                );
+            }
+            catch (Exception) { } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
         }
 
         #endregion

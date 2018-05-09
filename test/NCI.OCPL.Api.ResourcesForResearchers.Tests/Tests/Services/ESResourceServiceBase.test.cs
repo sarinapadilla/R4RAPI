@@ -34,7 +34,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
 
             //Wrapping protected methods for testing
             public QueryContainer TEST_GetFullQuery(string keyword, Dictionary<string, string[]> filtersList) => this.GetFullQuery(keyword, filtersList);
-            public QueryContainer TEST_GetKeywordQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fullTextFieldsList) => this.GetKeywordQuery(keyword, fullTextFieldsList);
+            public QueryContainer TEST_GetKeywordQuery(string keyword) => this.GetKeywordQuery(keyword);
             public IEnumerable<QueryContainer> TEST_GetAllFiltersForQuery(Dictionary<string, string[]> filtersList) => this.GetAllFiltersForQuery(filtersList);
             public QueryContainer TEST_GetQueryForFilterField(string field, string[] filters) => this.GetQueryForFilterField(field, filters);
             public TermQuery TEST_GetQueryForField(string field, string value) => this.GetQueryForField(field, value);
@@ -45,6 +45,71 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
         }
 
         #region GetFullQuery
+
+        public static IEnumerable<object[]> GetFullQueryScenarioData => new[] {
+            //Multi Group, Both Multi Param
+            new object[] {
+                "testkeyword",
+                new string[]{
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""common"": { ""title._fulltext"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                                { ""match"": { ""title._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                                { ""match"": { ""title._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                                { ""common"": { ""body._fulltext"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                                { ""match"": { ""body._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                                { ""match"": { ""body._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                                { ""match"": { ""pocs.lastname._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                                { ""match"": { ""pocs.firstname._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                                { ""match"": { ""pocs.middlename._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } }
+                            ], ""minimum_should_match"": null, ""disable_coord"": null, ""_name"": null, ""boost"": null
+                        }
+                    }"
+                },
+                new Dictionary<string, string[]>{
+                    {"filterG2", new string[]{"filter1", "filter2"}},
+                    {"filterG1", new string[]{"filter1", "filter2"}}
+                },
+                new string[]{
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""term"": { ""filterG2.key"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG2.key"": { ""value"": ""filter2"" } } }
+                            ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
+                        }
+                    }",
+                    @"
+                    {
+                        ""bool"": {
+                            ""should"": [
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter1"" } } },
+                                { ""term"": { ""filterG1.key"": { ""value"": ""filter2"" } } }
+                            ], ""minimum_should_match"": 1, ""disable_coord"": null, ""_name"": null, ""boost"": null
+                        }
+                    }
+                    "
+                }
+            }
+        };
+
+        [Theory, MemberData(nameof(GetFullQueryScenarioData))]
+        public void GetFullQuery_Scenarios(string keyword, string[] expectedFullTextQuery, Dictionary<string, string[]> filters, string[] expectedFilters)
+        {
+            var actual = this._junkSvc.TEST_GetFullQuery(keyword, filters);
+
+            string preKeyword = @"{ ""bool"": { ""must"": [ ";
+            string postKeyword = @"], ";
+            string preFilter = @"""filter"": [";
+            string postFilter = @"], ""minimum_should_match"": null, ""disable_coord"": null,""_name"": null,""boost"": null } }";
+
+            string expected = preKeyword + string.Join(',', expectedFullTextQuery) + postKeyword + preFilter + string.Join(',', expectedFilters) + postFilter;
+
+            ElasticTools.AssertQueryJson(expected, actual);
+        }
 
         #endregion
 
@@ -113,7 +178,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     "
                 }
             },
-            //Multi Group, One Single and One Multi Param
+            //Multi Group, Both Multi Param
             new object[] {
                 new Dictionary<string, string[]>{
                     {"filterG2", new string[]{"filter1", "filter2"}},
@@ -234,10 +299,46 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
 
         #endregion
 
+        #region GetKeywordQuery
+        
+        public static IEnumerable<object[]> GetKeywordQueryScenarioData => new[] {
+            // Multiple fields, multiple match types
+            new object[] {
+                "testkeyword",
+                new string[]{
+                    @"
+                        { ""common"": { ""title._fulltext"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""match"": { ""title._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""match"": { ""title._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                        { ""common"": { ""body._fulltext"": { ""query"": ""testkeyword"", ""cutoff_frequency"": 1.0, ""low_freq_operator"": ""and"", ""boost"": 1.0 } } },
+                        { ""match"": { ""body._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""match"": { ""body._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0, ""type"": ""phrase"" } } },
+                        { ""match"": { ""pocs.lastname._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""match"": { ""pocs.firstname._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                        { ""match"": { ""pocs.middlename._fulltext"": { ""query"": ""testkeyword"", ""boost"": 1.0 } } },
+                    "
+                }
+            }
+        };
+
+        [Theory, MemberData(nameof(GetKeywordQueryScenarioData))]
+        public void GetKeywordQuery_Scenarios(string keyword, string[] expectedFullTextQuery)
+        {
+            var actual = this._junkSvc.TEST_GetKeywordQuery(keyword);
+
+            string pre = @"{ ""bool"": { ""should"": [";
+            string post = @"], ""minimum_should_match"": null, ""disable_coord"": null,""_name"": null,""boost"": null } }";
+            string expected = pre + string.Join(',', expectedFullTextQuery) + post;
+
+            ElasticTools.AssertQueryJson(expected, actual);
+        }
+
+        #endregion
+
         #region GetFullTextQuery
 
         public static IEnumerable<object[]> GetFullTextQueryScenarioData => new[] {
-            //Single Field, Single MatchType
+            // Multiple fields, multiple match types
             new object[] {
                 "testkeyword",
                 new R4RAPIOptions.FullTextFieldConfig[]

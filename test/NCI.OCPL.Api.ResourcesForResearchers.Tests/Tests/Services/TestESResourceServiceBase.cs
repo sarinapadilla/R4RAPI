@@ -98,35 +98,35 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                 AvailableFullTextFields = new Dictionary<string, R4RAPIOptions.FullTextFieldConfig> {
                     {
                         "title", new R4RAPIOptions.FullTextFieldConfig {
-                            FieldName = "title",
+                            FieldName = "title._fulltext",
                             Boost = 1,
                             MatchTypes = new string[] { "common", "match", "match_phrase" }
                         }
                     },
                     {
                         "body", new R4RAPIOptions.FullTextFieldConfig {
-                            FieldName = "body",
+                            FieldName = "body._fulltext",
                             Boost = 1,
                             MatchTypes = new string[] { "common", "match", "match_phrase" }
                         }
                     },
                     {
                         "pocs.lastname", new R4RAPIOptions.FullTextFieldConfig {
-                            FieldName = "pocs.lastname",
+                            FieldName = "pocs.lastname._fulltext",
                             Boost = 1,
                             MatchTypes = new string[] { "match"}
                         }
                     },
                     {
                         "pocs.firstname", new R4RAPIOptions.FullTextFieldConfig {
-                            FieldName = "pocs.firstname",
+                            FieldName = "pocs.firstname._fulltext",
                             Boost = 1,
                             MatchTypes = new string[] { "match"}
                         }
                     },
                     {
                         "pocs.middlename", new R4RAPIOptions.FullTextFieldConfig {
-                            FieldName = "pocs.middlename",
+                            FieldName = "pocs.middlename._fulltext",
                             Boost = 1,
                             MatchTypes = new string[] { "match"}
                         }

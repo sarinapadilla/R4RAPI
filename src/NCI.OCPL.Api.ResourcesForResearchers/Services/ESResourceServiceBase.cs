@@ -49,24 +49,11 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
         /// <remarks>This is used by both the Query and Aggregation services.</remarks>
         /// <returns>A QueryContainer representing the entire query.  </returns>
         /// <param name="keyword">Keyword for the search</param>
-        /// <param name="fullTextFieldsList">The complete full text fields list</param>
         /// <param name="filtersList">The complete filters list</param>
         protected QueryContainer GetFullQuery(string keyword, Dictionary<string, string[]> filtersList) {
             QueryContainer query = null;
 
-            // Get list of full text fields from options for query building
-            R4RAPIOptions.FullTextFieldConfig[] fullTextFieldsList = null;
-            try
-            {
-                fullTextFieldsList = this._apiOptions.AvailableFullTextFields.Select(f => f.Value).ToArray();
-            }
-            catch (Exception ex)
-            {
-                this._logger.LogError("Could not fetch full text fields from configuration.");
-                throw new Exception("Could not fetch full text fields from configuration.", ex);
-            }
-
-            QueryContainer keywordQuery = GetKeywordQuery(keyword, fullTextFieldsList);
+            QueryContainer keywordQuery = GetKeywordQuery(keyword);
             IEnumerable<QueryContainer> filtersQueries = GetAllFiltersForQuery(filtersList);
 
             if (keywordQuery != null && filtersQueries.Count() > 0) {
@@ -180,14 +167,26 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
         /// <returns>The keyword query.</returns>
         /// <param name="keyword">Keyword.</param>
         /// <param name="fields">Full text fields.</param>
-        protected QueryContainer GetKeywordQuery(string keyword, R4RAPIOptions.FullTextFieldConfig[] fields)
+        protected QueryContainer GetKeywordQuery(string keyword)
         {
+            // Get list of full text fields from options for query building
+            R4RAPIOptions.FullTextFieldConfig[] fullTextFieldsList = null;
+            try
+            {
+                fullTextFieldsList = this._apiOptions.AvailableFullTextFields.Select(f => f.Value).ToArray();
+            }
+            catch (Exception ex)
+            {
+                this._logger.LogError("Could not fetch full text fields from configuration.");
+                throw new Exception("Could not fetch full text fields from configuration.", ex);
+            }
+
             QueryContainer query = null;
             if (!string.IsNullOrEmpty(keyword))
             {
                 query = new BoolQuery
                 {
-                    Should = GetFullTextQuery(keyword, fields)
+                    Should = GetFullTextQuery(keyword, fullTextFieldsList)
                 };
             }
             return query;

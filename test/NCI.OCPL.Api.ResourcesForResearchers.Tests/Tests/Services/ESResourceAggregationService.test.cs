@@ -75,7 +75,18 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
 
         [Fact]
         public void GetKLA_Build_SubType_Missing_Tooltype() {
-            
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            ESResourceAggregationService aggSvc = this.GetService<ESResourceAggregationService>(conn);
+
+            Assert.ThrowsAny<Exception>(() => {
+                KeyLabelAggResult[] aggResults = aggSvc.GetKeyLabelAggregation(
+                    "toolSubtypes",
+                    new ResourceQuery
+                    {
+                        Filters = new Dictionary<string, string[]> { }
+                    }
+                );
+            });
         }
 
         [Fact]
