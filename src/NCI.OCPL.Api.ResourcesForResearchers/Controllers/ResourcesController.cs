@@ -205,6 +205,11 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
 
                     //While we may have asked for size 0, this will still tell us if the full query has results.
                     noMatchedResults = queryResults.TotalResults == 0;
+
+                    if(from > queryResults.TotalResults)
+                    {
+                        throw new ArgumentOutOfRangeException("from", "Offset (from) value is greater than the number of results.");
+                    }
                 }),
                 Task.Run(async () =>
                 {
@@ -222,7 +227,6 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
             if (noMatchedResults) {
                 results.Facets = new Facet[] { };
             }
-
 
             return results;
         }

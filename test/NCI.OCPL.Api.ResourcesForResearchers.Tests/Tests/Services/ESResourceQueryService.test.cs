@@ -122,9 +122,211 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     }
                 );
             }
-            catch (Exception ex) {
-                int i = 10;
-            } //We don't care how it processes the results...
+            catch (Exception) { } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
+        }
+
+        [Fact]
+        public void QueryResources_From()
+        {
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                  ""from"": 20,
+                  ""size"": 20,
+                  ""_source"": {
+                    ""includes"": [
+                      ""id"",
+                      ""title"",
+                      ""website"",
+                      ""description"",
+                      ""toolTypes"",
+                      ""researchAreas"",
+                      ""researchTypes"",
+                      ""resourceAccess"",
+                      ""docs"",
+                      ""pocs""
+                    ]
+                  },
+                  ""sort"": [
+                    { ""_score"": { } },
+                    { ""id"": { } }
+                  ],
+                }"
+            );
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            var svc = this.GetService<ESResourceQueryService>(conn);
+            try
+            {
+                var results = svc.QueryResources(
+                    query: new ResourceQuery
+                    {
+                        Keyword = null,
+                        Filters = new Dictionary<string, string[]> { }
+                    },
+                    from: 20,
+                    includeFields: new string[]
+                    {
+                        "id",
+                        "title",
+                        "website",
+                        "description",
+                        "toolTypes",
+                        "researchAreas",
+                        "researchTypes",
+                        "resourceAccess",
+                        "docs",
+                        "pocs"
+                    }
+                );
+            }
+            catch (Exception) { } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
+        }
+
+        [Fact]
+        public void QueryResources_Size()
+        {
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                  ""from"": 0,
+                  ""size"": 50,
+                  ""_source"": {
+                    ""includes"": [
+                      ""id"",
+                      ""title"",
+                      ""website"",
+                      ""description"",
+                      ""toolTypes"",
+                      ""researchAreas"",
+                      ""researchTypes"",
+                      ""resourceAccess"",
+                      ""docs"",
+                      ""pocs""
+                    ]
+                  },
+                  ""sort"": [
+                    { ""_score"": { } },
+                    { ""id"": { } }
+                  ],
+                }"
+            );
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            var svc = this.GetService<ESResourceQueryService>(conn);
+            try
+            {
+                var results = svc.QueryResources(
+                    query: new ResourceQuery
+                    {
+                        Keyword = null,
+                        Filters = new Dictionary<string, string[]> { }
+                    },
+                    size: 50,
+                    includeFields: new string[]
+                    {
+                        "id",
+                        "title",
+                        "website",
+                        "description",
+                        "toolTypes",
+                        "researchAreas",
+                        "researchTypes",
+                        "resourceAccess",
+                        "docs",
+                        "pocs"
+                    }
+                );
+            }
+            catch (Exception) { } //We don't care how it processes the results...
+
+
+            Assert.Equal(expectedPath, actualPath);
+            Assert.Equal(expectedRequest, actualRequest, new JTokenEqualityComparer());
+        }
+
+        [Fact]
+        public void QueryResources_SingleInclude()
+        {
+            //Create new ESRegAggConnection...
+
+            string actualPath = "";
+            string expectedPath = "r4r_v1/resource/_search"; //Use index in config
+
+            JObject actualRequest = null;
+            JObject expectedRequest = JObject.Parse(@"
+                {
+                  ""from"": 20,
+                  ""size"": 20,
+                  ""_source"": {
+                    ""includes"": [
+                      ""id""
+                    ]
+                  },
+                  ""sort"": [
+                    { ""_score"": { } },
+                    { ""id"": { } }
+                  ],
+                }"
+            );
+
+            ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
+            //SearchResponse<Resource> <-- type
+            conn.RegisterRequestHandlerForType<SearchResponse<Resource>>((req, res) =>
+            {
+                actualPath = req.Path;
+                actualRequest = conn.GetRequestPost(req);
+            });
+
+            var svc = this.GetService<ESResourceQueryService>(conn);
+            try
+            {
+                var results = svc.QueryResources(
+                    query: new ResourceQuery
+                    {
+                        Keyword = null,
+                        Filters = new Dictionary<string, string[]> { }
+                    },
+                    from: 20,
+                    includeFields: new string[]
+                    {
+                        "id"
+                    }
+                );
+            }
+            catch (Exception) { } //We don't care how it processes the results...
 
 
             Assert.Equal(expectedPath, actualPath);
