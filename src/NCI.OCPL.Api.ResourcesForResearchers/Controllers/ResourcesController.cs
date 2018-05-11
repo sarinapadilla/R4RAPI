@@ -152,9 +152,21 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
                 facetsBeingRequested = includeFacets;
             }
 
+            string[] fieldsBeingRequested = new string[] { };
             if (IsNullOrEmpty(includeFields))
             {
-                includeFields = new string[] { };
+                fieldsBeingRequested = GetDefaultIncludeFields();
+            }
+            else if (!ValidateFieldList(includeFields))
+            {
+                //TODO: Actually list the invalid fields
+                _logger.LogError("Included fields in query are not valid.");
+                throw new ArgumentException("Included fields in query are not valid.");
+            }
+            else
+            {
+
+                fieldsBeingRequested = includeFields;
             }
 
             //Create the results object
@@ -166,7 +178,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
                 Task.Run(async () =>
                 {
                     // Perform query for resources (using params if they're given)
-                    ResourceQueryResult queryResults = await _queryService.QueryResourcesAsync(resourceQuery, size, from, includeFields);
+                    ResourceQueryResult queryResults = await _queryService.QueryResourcesAsync(resourceQuery, size, from, fieldsBeingRequested);
 
                     // Convert query results into ResourceResults
                     PageMetaData meta = new PageMetaData
@@ -218,6 +230,33 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
         static bool IsNullOrEmpty(string[] myStringArray)
         {
             return myStringArray == null || myStringArray.Length < 1;
+        }
+
+        /// <summary>
+        /// Gets the default fields to include on returned results from the config
+        /// </summary>
+        /// <returns>A list of default fields</returns>
+        private string[] GetDefaultIncludeFields()
+        {
+            return _apiOptions.AvailableFields;
+        }
+
+        /// <summary>
+        /// Validates the given list of include fields using available fields from the config
+        /// </summary>
+        /// <returns>A boolean indicating whether the list of fields is valid</returns>
+        /// <param name="includeFields">A list of facet names</param>
+        private bool ValidateFieldList(string[] includeFields)
+        {
+            foreach (var fieldName in includeFields)
+            {
+                if (!_apiOptions.AvailableFields.Contains(fieldName))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

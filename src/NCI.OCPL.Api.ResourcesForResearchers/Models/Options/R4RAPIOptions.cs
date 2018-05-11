@@ -23,6 +23,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Models
         public Dictionary<string, FacetConfig> AvailableFacets { get; set; } = new Dictionary<string, FacetConfig>();
 
         /// <summary>
+        /// Gets or sets the available fields for the resources returned from API
+        /// </summary>
+        /// <value>The available fields.</value>
+        public string[] AvailableFields { get; set; } = new string[] { };
+
+        /// <summary>
         /// Gets or sets the available full text fields and their configuration for the API
         /// </summary>
         /// <value>The available full text fields.</value>

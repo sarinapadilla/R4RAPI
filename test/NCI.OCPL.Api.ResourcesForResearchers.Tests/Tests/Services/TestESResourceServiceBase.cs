@@ -95,6 +95,19 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                         }
                     }
                 },
+                AvailableFields = new string[]
+                {
+                    "id",
+                    "title",
+                    "website",
+                    "description",
+                    "toolTypes",
+                    "researchAreas",
+                    "researchTypes",
+                    "resourceAccess",
+                    "docs",
+                    "pocs"
+                },
                 AvailableFullTextFields = new Dictionary<string, R4RAPIOptions.FullTextFieldConfig> {
                     {
                         "title", new R4RAPIOptions.FullTextFieldConfig {

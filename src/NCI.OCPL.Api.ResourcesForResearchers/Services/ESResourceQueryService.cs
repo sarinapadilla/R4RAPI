@@ -119,9 +119,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
                 {
                     new SortField { Field = "_score" },
                     new SortField { Field = "id" }
-                }
+                },
                 //TODO:
-                //  Source = includeFields
+                Source = new SourceFilter
+                {
+                    Includes = includeFields
+                }
             };
 
             //Add in the query

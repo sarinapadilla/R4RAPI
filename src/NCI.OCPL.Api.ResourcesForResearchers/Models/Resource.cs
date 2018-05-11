@@ -20,13 +20,6 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Models
         public int ID { get; set; }
 
         /// <summary>
-        /// The detailed description of the resource
-        /// </summary>
-        /// <value>The body.</value>
-        [Keyword(Name = "body")]
-        public string Body { get; set; }
-
-        /// <summary>
         /// The title of the resource
         /// </summary>
         /// <value>The title.</value>

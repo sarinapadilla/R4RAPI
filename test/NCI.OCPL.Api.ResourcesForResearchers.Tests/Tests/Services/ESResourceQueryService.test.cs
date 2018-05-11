@@ -69,14 +69,26 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                 {
                   ""from"": 0,
                   ""size"": 20,
+                  ""_source"": {
+                    ""includes"": [
+                      ""id"",
+                      ""title"",
+                      ""website"",
+                      ""description"",
+                      ""toolTypes"",
+                      ""researchAreas"",
+                      ""researchTypes"",
+                      ""resourceAccess"",
+                      ""docs"",
+                      ""pocs""
+                    ]
+                  },
                   ""sort"": [
                     { ""_score"": { } },
                     { ""id"": { } }
-                  ]
-                } 
-            ");
-            /*
-            */
+                  ],
+                }"
+            );
 
             ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
             //SearchResponse<Resource> <-- type
@@ -90,14 +102,29 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
             try
             {
                 var results = svc.QueryResources(
-                    new ResourceQuery
+                    query: new ResourceQuery
                     {
                         Keyword = null,
                         Filters = new Dictionary<string, string[]> { }
+                    },
+                    includeFields: new string[]
+                    {
+                        "id",
+                        "title",
+                        "website",
+                        "description",
+                        "toolTypes",
+                        "researchAreas",
+                        "researchTypes",
+                        "resourceAccess",
+                        "docs",
+                        "pocs"
                     }
                 );
             }
-            catch (Exception) { } //We don't care how it processes the results...
+            catch (Exception ex) {
+                int i = 10;
+            } //We don't care how it processes the results...
 
 
             Assert.Equal(expectedPath, actualPath);
@@ -117,6 +144,20 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                 {
                   ""from"": 0,
                   ""size"": 20,
+                  ""_source"": {
+                    ""includes"": [
+                      ""id"",
+                      ""title"",
+                      ""website"",
+                      ""description"",
+                      ""toolTypes"",
+                      ""researchAreas"",
+                      ""researchTypes"",
+                      ""resourceAccess"",
+                      ""docs"",
+                      ""pocs""
+                    ]
+                  },
                   ""sort"": [
                     { ""_score"": { } },
                     { ""id"": { } }
@@ -131,8 +172,6 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
 
                 } 
             ");
-            /*
-            */
 
             ElasticsearchInterceptingConnection conn = new ElasticsearchInterceptingConnection();
             //SearchResponse<Resource> <-- type
@@ -146,11 +185,24 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
             try
             {
                 var results = svc.QueryResources(
-                    new ResourceQuery
+                    query: new ResourceQuery
                     {
                         Filters = new Dictionary<string, string[]>{
                             { "researchTypes", new string[] { "basic"} }
-                        }
+                         },
+                    },
+                    includeFields: new string[]
+                    {
+                        "id",
+                        "title",
+                        "website",
+                        "description",
+                        "toolTypes",
+                        "researchAreas",
+                        "researchTypes",
+                        "resourceAccess",
+                        "docs",
+                        "pocs"
                     }
                 );
             }
@@ -174,6 +226,20 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                 {
                   ""from"": 0,
                   ""size"": 20,
+                  ""_source"": {
+                    ""includes"": [
+                      ""id"",
+                      ""title"",
+                      ""website"",
+                      ""description"",
+                      ""toolTypes"",
+                      ""researchAreas"",
+                      ""researchTypes"",
+                      ""resourceAccess"",
+                      ""docs"",
+                      ""pocs""
+                    ]
+                  },
                   ""sort"": [
                     { ""_score"": { } },
                     { ""id"": { } }
@@ -219,12 +285,25 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
             try
             {
                 var results = svc.QueryResources(
-                    new ResourceQuery
+                    query: new ResourceQuery
                     {
                         Keyword = "CGCI",
                         Filters = new Dictionary<string, string[]>{
                             { "researchTypes", new string[] { "basic"} }
                         }
+                    },
+                    includeFields: new string[]
+                    {
+                        "id",
+                        "title",
+                        "website",
+                        "description",
+                        "toolTypes",
+                        "researchAreas",
+                        "researchTypes",
+                        "resourceAccess",
+                        "docs",
+                        "pocs"
                     }
                 );
             }
