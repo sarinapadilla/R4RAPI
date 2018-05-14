@@ -34,6 +34,13 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Models
         public string Website { get; set; }
 
         /// <summary>
+        /// The detailed description of the resource
+        /// </summary>
+        /// <value>The body.</value>
+        [Keyword(Name = "body")]
+        public string Body { get; set; }
+
+        /// <summary>
         /// A brief description of the resource
         /// </summary>
         /// <value>The description.</value>

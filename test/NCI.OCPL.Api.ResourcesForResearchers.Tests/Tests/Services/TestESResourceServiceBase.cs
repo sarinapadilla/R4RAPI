@@ -100,6 +100,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     "id",
                     "title",
                     "website",
+                    "body",
                     "description",
                     "toolTypes",
                     "researchAreas",
