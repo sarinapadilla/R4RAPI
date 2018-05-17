@@ -63,8 +63,8 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
         /// <param name="docs">One or more Divisions, Offices, and Centers (DOCs) to filter by </param>
         /// <param name="includeFields">Resource fields to include. (When empty all are returned)</param>
         /// <param name="includeFacets">Available Facets to return. (When empty all are returned)</param>
-        /// <param name="size">The number of resources to return</param>
-        /// <param name="from">The offset of the resources to return</param>
+        /// <param name="strSize">The number of resources to return</param>
+        /// <param name="strFrom">The offset of the resources to return</param>
         [HttpGet]
         public async Task<ResourceResults> GetAll(
             [FromQuery(Name = "q")] string keyword = null,
@@ -75,24 +75,76 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
             [FromQuery(Name = "docs")] string[] docs = null,
             [FromQuery(Name = "include")] string[] includeFields = null,
             [FromQuery(Name = "includeFacets")] string[] includeFacets = null,
-            [FromQuery] int size = 20,
-            [FromQuery] int from = 0
+            [FromQuery(Name = "size")] string strSize = null,
+            [FromQuery(Name = "from")] string strFrom = null
         )
         {
-            // TODO: Validate query params here - need more validation!
+            // Validate query params here
 
-            // 1. Cause error if subToolType exists, but no toolType
+            // 1. Throw error if subToolType exists, but no toolType
             if (IsNullOrEmpty(toolTypes) && !IsNullOrEmpty(subTypes))
             {
                 _logger.LogError("Cannot have subtype without tooltype.", subTypes);
                 throw new ArgumentException("Cannot have subtype without tooltype.");
             }
 
-            // 2. Cause error if multiple toolTypes exist
+            // 2. Throw error if multiple toolTypes exist
             if (toolTypes != null && toolTypes.Length > 1)
             {
                 _logger.LogError("Cannot have multiple tooltypes.", toolTypes);
                 throw new ArgumentException("Cannot have multiple tooltypes.");
+            }
+
+            // 3. Throw error if size is invalid int
+            int size;
+            if (string.IsNullOrWhiteSpace(strSize))
+            {
+                size = 20;
+            }
+            else
+            {
+                int tmpInt = -1;
+                if (int.TryParse(strSize.Trim(), out tmpInt))
+                {
+                    if (tmpInt == -1)
+                    {
+                        _logger.LogError($"Invalid size parameter: {strSize}.");
+                        throw new APIErrorException(400, $"Bad request: Invalid size parameter {strSize}.");
+                    }
+
+                    size = tmpInt;
+                }
+                else
+                {
+                    _logger.LogError($"Invalid size parameter: {strSize}.");
+                    throw new APIErrorException(400, $"Bad request: Invalid size parameter {strSize}.");
+                }
+            }
+
+            // 4. Throw error if from is invalid int
+            int from;
+            if (string.IsNullOrWhiteSpace(strFrom))
+            {
+                from = 0;
+            }
+            else
+            {
+                int tmpInt = -1;
+                if (int.TryParse(strFrom.Trim(), out tmpInt))
+                {
+                    if (tmpInt == -1)
+                    {
+                        _logger.LogError($"Invalid from parameter: {strFrom}.");
+                        throw new APIErrorException(400, $"Bad request: Invalid from parameter {strFrom}.");
+                    }
+
+                    from = tmpInt;
+                }
+                else
+                {
+                    _logger.LogError($"Invalid from parameter: {strFrom}.");
+                    throw new APIErrorException(400, $"Bad request: Invalid from parameter {strFrom}.");
+                }
             }
 
             // Build resource query object using params
@@ -208,7 +260,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
 
                     if(from > queryResults.TotalResults)
                     {
-                        throw new ArgumentOutOfRangeException("from", "Offset (from) value is greater than the number of results.");
+                        throw new APIErrorException(400, $"Offset (from) value of {queryResults.TotalResults} is greater than the number of results.");
                     }
                 }),
                 Task.Run(async () =>

@@ -125,6 +125,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
             app.UseSwaggerUi3(typeof(Startup).GetTypeInfo().Assembly, settings =>
             {
                 settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
+                settings.SwaggerUiRoute = "";
             });
 
             // Allow use from anywhere.
