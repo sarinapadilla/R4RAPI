@@ -33,8 +33,10 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
         /// </summary>
         /// <param name="environment">Environment.</param>
         /// <param name="logger">Logger.</param>
+        /// /// <param name="apiOptionsAccessor">API Options.</param>
         /// <param name="queryService">Query service.</param>
         /// <param name="aggService">Agg service.</param>
+        /// <param name="urlHelper">URL helper.</param>
         public ResourcesController(
             IHostingEnvironment environment, 
             ILogger<ResourcesController> logger,
@@ -45,7 +47,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
         {
             _environment = environment;
             _logger = logger;
-            _apiOptions = apiOptionsAccessor.Value;
+            _apiOptions = apiOptionsAccessor.Value.IsValid() ? apiOptionsAccessor.Value : throw new Exception("R4RAPIOptions is misconfigured.");
             _queryService = queryService;
             _aggService = aggService;
             _urlHelper = urlHelper;
@@ -247,8 +249,8 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
                             researchAreas,
                             researchTypes,
                             docs,
+                            //DO NOT USE fieldsBeingRequested or facetsBeingRequested HERE. These are the original lists provided by the user.
                             include = includeFields,
-                            //DO NOT USE facetsBeingRequested HERE. This is the original list provided by the user.
                             includeFacets
                         })
                     };

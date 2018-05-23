@@ -39,7 +39,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
         public ESResourceServiceBase(IElasticClient client, IOptions<R4RAPIOptions> apiOptionsAccessor, ILogger logger)
         {
             this._elasticClient = client;
-            this._apiOptions = apiOptionsAccessor.Value;
+            this._apiOptions = apiOptionsAccessor.Value.IsValid() ? apiOptionsAccessor.Value : throw new Exception("R4RAPIOptions is misconfigured.");
             this._logger = logger;
         }
 

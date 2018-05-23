@@ -118,8 +118,6 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
                 app.UseDeveloperExceptionPage();
             }
 
-
-
             app.UseStaticFiles();
             // Enable the Swagger UI middleware and the Swagger generator
             app.UseSwaggerUi3(typeof(Startup).GetTypeInfo().Assembly, settings =>

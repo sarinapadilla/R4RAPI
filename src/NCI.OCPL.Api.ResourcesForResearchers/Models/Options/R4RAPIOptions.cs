@@ -32,7 +32,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Models
         /// Gets or sets the available full text fields and their configuration for the API
         /// </summary>
         /// <value>The available full text fields.</value>
-        public Dictionary<string,FullTextFieldConfig> AvailableFullTextFields { get; set; } = new Dictionary<string, FullTextFieldConfig>();
+        public Dictionary<string, FullTextFieldConfig> AvailableFullTextFields { get; set; } = new Dictionary<string, FullTextFieldConfig>();
 
         #region Sub classes
 
@@ -121,5 +121,38 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Models
         }
 
         #endregion
+
+        /// <summary>
+        /// Validates the R4RAPIOptions object and returns false if misconfigured.
+        /// </summary>
+        /// <returns>Whether or not the R4RAPIOptions is valid.</returns>
+        public bool IsValid()
+        {
+            if (String.IsNullOrWhiteSpace(this.AliasName))
+            {
+                return false;
+            }
+
+            if (this.AvailableFacets.Values.Any(v => 
+                    string.IsNullOrWhiteSpace(v.FilterName) || 
+                    string.IsNullOrWhiteSpace(v.Label) ||
+                    (v.FacetType != FacetTypes.Single && v.FacetType != FacetTypes.Multiple)
+                )
+            )
+            {
+                return false;
+            }
+
+            if (this.AvailableFullTextFields.Values.Any(v => 
+                    string.IsNullOrWhiteSpace(v.FieldName) ||
+                    v.MatchTypes.Any(m => string.IsNullOrWhiteSpace(m))
+                )
+            )
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
