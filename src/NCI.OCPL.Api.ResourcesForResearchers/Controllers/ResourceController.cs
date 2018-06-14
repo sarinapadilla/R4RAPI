@@ -49,7 +49,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
             if(result == null)
             {
                 _logger.LogError("Could not fetch resource for ID " + id);
-                throw new Exception("Could not fetch resource for ID " + id);
+                throw new APIErrorException(404, "Could not fetch resource for ID " + id);
             }
 
             return result;

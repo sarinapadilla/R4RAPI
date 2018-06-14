@@ -44,35 +44,35 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
 
             if (validID)
             {
+                IGetResponse<Resource> response = null;
+
                 try
                 {
                     // Fetch the resource with the given ID from the API.
-                    var response = await _elasticClient.GetAsync<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
-
-                    // If the API's response isn't valid, throw an error and return 500 status code.
-                    if (!response.IsValid)
-                    {
-                        _logger.LogError("Elasicsearch response is not valid. Resource ID " + resID);
-                        throw new APIErrorException(500, "Errors occurred.");
-                    }
-
-                    // If the API finds the resource, return the resource.
-                    if (response.Found && response.IsValid)
-                    {
-                        resResult = response.Source;
-                    }
-                    // If the API cannot find the resource, throw an error and return 404 status code.
-                    else if (!response.Found && response.IsValid)
-                    {
-                        _logger.LogError("Elasticsearch could not find resource with ID " + resID);
-                        throw new APIErrorException(404, "Resource not found.");
-                    }
+                    response = await _elasticClient.GetAsync<Resource>(new GetRequest(this._apiOptions.AliasName, "resource", resID));
                 }
                 catch (Exception ex)
                 {
                     // Throw an exception if an error occurs.
-                    _logger.LogError("Could not fetch resource ID " + resID);
-                    throw new Exception("Could not fetch resource ID " + resID, ex);
+                    _logger.LogError("Could not fetch resource ID " + resID, ex);
+                    throw new APIErrorException(500, "Could not fetch resource ID " + resID);
+                }
+
+                // If the API's response isn't valid, throw an error and return 500 status code.
+                if (!response.IsValid)
+                {
+                    throw new APIErrorException(500, "Errors occurred.");
+                }
+
+                // If the API finds the resource, return the resource.
+                if (response.Found && response.IsValid)
+                {
+                    resResult = response.Source;
+                }
+                // If the API cannot find the resource, throw an error and return 404 status code.
+                else if (!response.Found && response.IsValid)
+                {
+                    throw new APIErrorException(404, "Resource not found.");
                 }
             }
             else
@@ -134,38 +134,40 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
                 request.Query = searchQuery;
             }
 
+            ISearchResponse<Resource> response = null;
+
             try
             {
                 // Fetch the resources that match the given query and parameters from the API.
-                var response = await _elasticClient.SearchAsync<Resource>(request);
-
-                // If the API's response isn't valid, throw an error and return 500 status code.
-                if (!response.IsValid)
-                {
-                    _logger.LogError("Bad request.");
-                    throw new APIErrorException(500, "Errors occurred.");
-                }
-
-                // If the API finds resources matching the params, build the ResourceQueryResult to return.
-                if (response.Total > 0)
-                {
-                    // Build the array of resources for the returned restult.
-                    List<Resource> resourceResults = new List<Resource>();
-                    foreach (Resource res in response.Documents)
-                    {
-                        resourceResults.Add(res);
-                    }
-
-                    queryResults.Results = resourceResults.ToArray();
-                    queryResults.TotalResults = Convert.ToInt32(response.Total);
-                    queryResults.From = from;
-                }
+                response = await _elasticClient.SearchAsync<Resource>(request);
             }
             catch (Exception ex)
             {
                 //TODO: Update error logger to include query
-                _logger.LogError("Could not fetch resources for query.");
-                throw new Exception("Could not fetch resources for query.", ex);
+                _logger.LogError("Could not fetch resources for query.", ex);
+                throw new APIErrorException(500, "Could not fetch resources for query.");
+            }
+
+            // If the API's response isn't valid, throw an error and return 500 status code.
+            if (!response.IsValid)
+            {
+                _logger.LogError("Bad request.");
+                throw new APIErrorException(500, "Errors occurred.");
+            }
+
+            // If the API finds resources matching the params, build the ResourceQueryResult to return.
+            if (response.Total > 0)
+            {
+                // Build the array of resources for the returned restult.
+                List<Resource> resourceResults = new List<Resource>();
+                foreach (Resource res in response.Documents)
+                {
+                    resourceResults.Add(res);
+                }
+
+                queryResults.Results = resourceResults.ToArray();
+                queryResults.TotalResults = Convert.ToInt32(response.Total);
+                queryResults.From = from;
             }
 
             return queryResults;

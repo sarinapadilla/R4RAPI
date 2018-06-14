@@ -110,8 +110,9 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
         /// <returns>The configure.</returns>
         /// <param name="app">App.</param>
         /// <param name="env">Env.</param>
+        /// <param name="loggerFactory">Logger.</param>
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -164,6 +165,8 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
                     }
                 });
             });
+
+            loggerFactory.AddFile("log/r4rapi-log.txt");
 
             app.UseMvc();
         }

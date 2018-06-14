@@ -5,6 +5,7 @@
 
 # Custom
 appsettings.*.json
+log/*.txt
 
 # User-specific files
 *.suo
