@@ -42,9 +42,9 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
         /// <returns>The by identifier.</returns>
         /// <param name="id">Identifier.</param>
         [HttpGet("{id}")]
-        public async Task<Resource> GetById(int id)
+        public async Task<Resource> GetById(string id)
         {
-            Resource result = await _queryService.GetAsync(id.ToString());
+            Resource result = await _queryService.GetAsync(id);
 
             if(result == null)
             {

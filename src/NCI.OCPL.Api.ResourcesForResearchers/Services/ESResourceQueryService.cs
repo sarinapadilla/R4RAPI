@@ -78,7 +78,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
             else
             {
                 // Throw an exception if the given ID is invalid (not an int).
-                throw new ArgumentException("The resource identifier is invalid.");
+                throw new APIErrorException(400, "The resource identifier is invalid.");
             }
 
             return resResult;

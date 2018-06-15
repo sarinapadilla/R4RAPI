@@ -201,7 +201,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
             {
                 //TODO: Actually list the invalid facets
                 _logger.LogError("Included facets in query are not valid.");
-                throw new ArgumentException("Included facets in query are not valid.");
+                throw new APIErrorException(400, "Included facets in query are not valid.");
             } else {
                 facetsBeingRequested = includeFacets;
             }
@@ -215,7 +215,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
             {
                 //TODO: Actually list the invalid fields
                 _logger.LogError("Included fields in query are not valid.");
-                throw new ArgumentException("Included fields in query are not valid.");
+                throw new APIErrorException(400, "Included fields in query are not valid.");
             }
             else
             {
