@@ -52,6 +52,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
         {
             services.AddLogging();
             services.AddOptions();
+            services.AddCors();
 
             //This allows us to easily generate URLs to routes
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -160,6 +161,15 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
                         {
                             Message = message
                         }.ToString());
+
+
+                        // THIS IS A HACK!!
+                        // When the pull request that fixes the timing of setting the CORS header (https://github.com/aspnet/CORS/pull/163) goes through,
+                        // we should remove this and test to see if it works without the hack.
+                        if (context.Request.Headers.ContainsKey("Origin"))
+                        {
+                            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                        }
 
                         await context.Response.Body.WriteAsync(contents, 0, contents.Length);
                     }
