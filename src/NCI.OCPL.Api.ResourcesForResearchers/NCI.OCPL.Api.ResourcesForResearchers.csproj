@@ -27,4 +27,8 @@
   <ItemGroup>
     <Compile Remove="Models\AggregationResult.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\PublishProfiles\FolderProfile.pubxml" />
+  </ItemGroup>
 </Project>

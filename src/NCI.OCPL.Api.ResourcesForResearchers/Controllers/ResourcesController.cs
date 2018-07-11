@@ -108,7 +108,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
                 int tmpInt = -1;
                 if (int.TryParse(strSize.Trim(), out tmpInt))
                 {
-                    if (tmpInt == -1)
+                    if (tmpInt < 0)
                     {
                         _logger.LogError($"Invalid size parameter: {strSize}.");
                         throw new APIErrorException(400, $"Bad request: Invalid size parameter {strSize}.");
@@ -134,7 +134,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Controllers
                 int tmpInt = -1;
                 if (int.TryParse(strFrom.Trim(), out tmpInt))
                 {
-                    if (tmpInt == -1)
+                    if (tmpInt < 0)
                     {
                         _logger.LogError($"Invalid from parameter: {strFrom}.");
                         throw new APIErrorException(400, $"Bad request: Invalid from parameter {strFrom}.");
