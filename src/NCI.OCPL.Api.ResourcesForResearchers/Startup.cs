@@ -126,6 +126,10 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
             {
                 settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
                 settings.SwaggerUiRoute = "";
+                settings.PostProcess = document =>
+                {
+                    document.Host = null;
+                };
             });
 
             // Allow use from anywhere.
