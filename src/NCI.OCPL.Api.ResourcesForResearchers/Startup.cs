@@ -65,6 +65,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
 
             services.Configure<ElasticsearchOptions>(Configuration.GetSection("Elasticsearch"));
             services.Configure<R4RAPIOptions>(Configuration.GetSection("R4RAPI"));
+            services.Configure<NSwagOptions>(Configuration.GetSection("NSwag"));
 
             // This will inject an IElasticClient using our configuration into any
             // controllers that take an IElasticClient parameter into its constructor.
@@ -125,6 +126,17 @@ namespace NCI.OCPL.Api.ResourcesForResearchers
             app.UseSwaggerUi3(typeof(Startup).GetTypeInfo().Assembly, settings =>
             {
                 settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
+
+                if(!string.IsNullOrEmpty(Configuration["NSwag:Title"]))
+                {
+                    settings.GeneratorSettings.Title = Configuration["NSwag:Title"];
+                }
+
+                if (!string.IsNullOrEmpty(Configuration["NSwag:Description"]))
+                {
+                    settings.GeneratorSettings.Description = Configuration["NSwag:Description"];
+                }
+
                 settings.SwaggerUiRoute = "";
                 settings.PostProcess = document =>
                 {
