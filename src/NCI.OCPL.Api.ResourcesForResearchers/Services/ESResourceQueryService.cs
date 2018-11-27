@@ -117,8 +117,7 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Services
                 From = from,
                 Sort = new List<ISort>
                 {
-                    new SortField { Field = "_score" },
-                    new SortField { Field = "id" }
+                    new SortField { Field = "title._sort", Order = SortOrder.Ascending }
                 },
                 //TODO:
                 Source = new SourceFilter
