@@ -85,9 +85,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     ]
                   },
                   ""sort"": [
-                    { ""_score"": { } },
-                    { ""id"": { } }
-                  ],
+                    {
+                      ""title._sort"": {
+                        ""order"": ""asc""
+                      }
+                    }
+                  ]
                 }"
             );
 
@@ -160,9 +163,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     ]
                   },
                   ""sort"": [
-                    { ""_score"": { } },
-                    { ""id"": { } }
-                  ],
+                    {
+                      ""title._sort"": {
+                        ""order"": ""asc""
+                      }
+                    }
+                  ]
                 }"
             );
 
@@ -236,9 +242,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     ]
                   },
                   ""sort"": [
-                    { ""_score"": { } },
-                    { ""id"": { } }
-                  ],
+                    {
+                      ""title._sort"": {
+                        ""order"": ""asc""
+                      }
+                    }
+                  ]
                 }"
             );
 
@@ -302,9 +311,12 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     ]
                   },
                   ""sort"": [
-                    { ""_score"": { } },
-                    { ""id"": { } }
-                  ],
+                    {
+                      ""title._sort"": {
+                        ""order"": ""asc""
+                      }
+                    }
+                  ]
                 }"
             );
 
@@ -368,8 +380,11 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     ]
                   },
                   ""sort"": [
-                    { ""_score"": { } },
-                    { ""id"": { } }
+                    {
+                      ""title._sort"": {
+                        ""order"": ""asc""
+                      }
+                    }
                   ],
                   ""query"": {
                     ""bool"": {
@@ -452,8 +467,11 @@ namespace NCI.OCPL.Api.ResourcesForResearchers.Tests.Services
                     ]
                   },
                   ""sort"": [
-                    { ""_score"": { } },
-                    { ""id"": { } }
+                    {
+                      ""title._sort"": {
+                        ""order"": ""asc""
+                      }
+                    }
                   ],
                   ""query"": {
                     ""bool"": {
