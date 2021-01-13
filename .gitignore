@@ -5,6 +5,7 @@
 
 # Custom
 appsettings.*.json
+!integration-tests/**/appsettings.inttest.json
 log/*.txt
 
 # User-specific files
@@ -225,7 +226,7 @@ ClientBin/
 *.publishsettings
 orleans.codegen.cs
 
-# Including strong name files can present a security risk 
+# Including strong name files can present a security risk
 # (https://github.com/github/gitignore/pull/2483#issue-259490424)
 #*.snk
 
@@ -320,7 +321,7 @@ __pycache__/
 # OpenCover UI analysis results
 OpenCover/
 
-# Azure Stream Analytics local run output 
+# Azure Stream Analytics local run output
 ASALocalRun/
 
 # MSBuild Binary and Structured Log
@@ -333,3 +334,10 @@ ASALocalRun/
 .vscode/tasks.json
 coverage.json
 lcov.info
+
+# Integration test output.
+target/*
+integration-tests/target
+
+# Include Karate for tests
+!integration-tests/bin
